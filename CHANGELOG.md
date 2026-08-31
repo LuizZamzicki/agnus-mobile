@@ -5,6 +5,21 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Autenticação
+
+- Tela de Login/Cadastro em abas (`SegmentedTabs`), com `react-hook-form` + `zod`.
+- **Login**: e-mail + senha, mostrar/ocultar senha, banner de erro (mensagem do back
+  aparece como está — inclui aviso de reuso de senha antiga).
+- **Cadastro**: nome, e-mail, CPF (formatado e validado com dígito verificador — mesma
+  regra do back), senha com medidor de força e checklist (`evaluatePasswordStrength`),
+  confirmação de senha. Sucesso volta para a aba de login com o e-mail preenchido.
+- `AuthContext.signIn` recusa contas `administrador` (`AdminNotAllowedError`): limpa o
+  token, não abre sessão e a tela mostra "use o painel web". O boot (`/auth/me`)
+  também desloga se a conta for admin.
+- `AccountScreen` sem sessão passa a oferecer "Entrar ou cadastrar".
+- Componentes reutilizáveis: `TextField`, `PasswordField`, `PasswordStrengthMeter`,
+  `SegmentedTabs`, `FormBanner`.
+
 ### Catálogo (sem login)
 
 - `src/api/products.ts`: `getCatalog` (paginado), `getBestSellers`, `getProduct`,

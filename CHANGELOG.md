@@ -5,6 +5,28 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Catálogo (sem login)
+
+- `src/api/products.ts`: `getCatalog` (paginado), `getBestSellers`, `getProduct`,
+  `getProductColors/Grades/Photos/Reviews`, `getProductBundle` (`Promise.all` das 5
+  chamadas, já que `GET /products/:id` não traz relações) e `getCategories`.
+- Tipos da API em `src/types/product.ts` (campos DECIMAL tipados como `string | number`;
+  `codigo_rgb` no formato `rgb(r,g,b)`).
+- `src/lib/produtos.ts` portado do web: `parseJsonSeguro`, `normalizarUrlImagem`,
+  `imagemPrincipal`, `corDeFundo`, `precoComVariacoes`, `mediaAvaliacoes`.
+- Hooks React Query (`src/hooks/products.ts`): `useCatalog` (infinite query),
+  `useBestSellers`, `useCategories`, `useProductBundle`.
+- **Início**: hero, atalhos de categoria, trilhos horizontais de "Mais vendidos" e
+  "Destaques do catálogo", pull-to-refresh.
+- **Catálogo**: busca com debounce (`q=`), filtro por categoria, grade de 2 colunas
+  com scroll infinito, pull-to-refresh, estados de loading/erro/vazio/fim-da-lista.
+- **Produto**: carrossel de fotos com indicadores, preço com acréscimo de cor/grade
+  ("a partir de" sem seleção), descrição, `ColorPicker` e `SizePicker` (obrigatórios),
+  média e lista de avaliações, barra fixa "Adicionar ao carrinho" (sem login → manda
+  para o Login; carrinho em si entra na próxima fase).
+- Componentes: `ProductCard`, `Price`, `Rating`, `PhotoCarousel`, `ColorPicker`,
+  `SizePicker`, `CategoryChips`, `SearchBar`, `ErrorState`.
+
 ### Fase 0 — Setup
 
 - Scaffold Expo (managed) + React Native + TypeScript (`expo-template-blank-typescript`).

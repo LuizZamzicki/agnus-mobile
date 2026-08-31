@@ -18,5 +18,13 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   `passwordStrength`.
 - Providers: React Query, `AuthContext` (JWT no SecureStore + reidratação via
   `/auth/me` no boot), `CartContext` (esqueleto).
-- Navegação: `AuthStack` vs `Tabs` conforme sessão; telas placeholder por fase.
+- Navegação: `RootNavigator` (native-stack: Tabs + Product + Login modal + NotFound)
+  e `Tabs` (Início · Catálogo · Carrinho · Conta) com badge de quantidade;
+  `linking` com prefixo `agnusapp://`. Telas placeholder substituídas por fase.
+- Componentes base: `Screen`, `Button`, `EmptyState`; tema claro (`src/theme`).
 - `.github/` com template de PR e workflow de CI (lint + typecheck).
+- `.gitattributes` normaliza fim de linha para LF.
+- Deps: `expo-secure-store`, `expo-constants`, `expo-image`, `expo-font`,
+  `@expo/vector-icons`, `react-navigation` (native-stack + bottom-tabs) e libs
+  nativas (`react-native-screens`, `-safe-area-context`, `-gesture-handler`),
+  `@tanstack/react-query`, `react-hook-form` + `zod` + `@hookform/resolvers`.

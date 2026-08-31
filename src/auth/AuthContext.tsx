@@ -2,8 +2,9 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import * as authApi from "../api/auth";
 import { ApiError } from "../api/client";
-import type { LoginInput, RegisterInput, User } from "../types/user";
+import { isAdmin, type LoginInput, type RegisterInput, type User } from "../types/user";
 
+import { AdminNotAllowedError } from "./errors";
 import { clearToken, loadToken, saveToken } from "./tokenStore";
 
 interface AuthContextValue {
@@ -31,6 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const me = await authApi.me();
+      if (isAdmin(me)) {
+        await signOut();
+        return;
+      }
       setUser(me);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -62,6 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = useCallback(async (input: LoginInput) => {
     const { user: loggedUser, token } = await authApi.login(input);
+    if (isAdmin(loggedUser)) {
+      await clearToken();
+      throw new AdminNotAllowedError();
+    }
     await saveToken(token);
     setUser(loggedUser);
     return loggedUser;

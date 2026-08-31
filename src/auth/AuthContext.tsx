@@ -1,0 +1,94 @@
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+
+import * as authApi from "../api/auth";
+import { ApiError } from "../api/client";
+import type { LoginInput, RegisterInput, User } from "../types/user";
+
+import { clearToken, loadToken, saveToken } from "./tokenStore";
+
+interface AuthContextValue {
+  user: User | null;
+  /** true enquanto reidrata a sessão no boot. */
+  initializing: boolean;
+  isAuthenticated: boolean;
+  signIn: (input: LoginInput) => Promise<User>;
+  signUp: (input: RegisterInput) => Promise<void>;
+  signOut: () => Promise<void>;
+  refresh: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [initializing, setInitializing] = useState(true);
+
+  const signOut = useCallback(async () => {
+    await clearToken();
+    setUser(null);
+  }, []);
+
+  const refresh = useCallback(async () => {
+    try {
+      const me = await authApi.me();
+      setUser(me);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        await signOut();
+      } else {
+        throw err;
+      }
+    }
+  }, [signOut]);
+
+  // Boot: se houver token salvo, reidrata via /auth/me (e desloga em 401).
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const token = await loadToken();
+      if (token && active) {
+        try {
+          await refresh();
+        } catch {
+          // erro de rede: mantém sessão, telas tratam o retry
+        }
+      }
+      if (active) setInitializing(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [refresh]);
+
+  const signIn = useCallback(async (input: LoginInput) => {
+    const { user: loggedUser, token } = await authApi.login(input);
+    await saveToken(token);
+    setUser(loggedUser);
+    return loggedUser;
+  }, []);
+
+  const signUp = useCallback(async (input: RegisterInput) => {
+    await authApi.register(input);
+  }, []);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      initializing,
+      isAuthenticated: !!user,
+      signIn,
+      signUp,
+      signOut,
+      refresh,
+    }),
+    [user, initializing, signIn, signUp, signOut, refresh],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthContextValue {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth deve ser usado dentro de <AuthProvider>");
+  return ctx;
+}

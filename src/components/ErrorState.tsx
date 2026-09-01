@@ -27,7 +27,9 @@ export function ErrorState({ error, onRetry, title = "Não deu para carregar" }:
   return (
     <View style={styles.container}>
       <Ionicons name="cloud-offline-outline" size={40} color={colors.textMuted} />
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {title}
+      </Text>
       <Text style={styles.message}>{messageFor(error)}</Text>
       {onRetry ? (
         <View style={styles.action}>

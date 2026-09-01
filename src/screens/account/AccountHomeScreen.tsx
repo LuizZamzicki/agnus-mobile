@@ -37,7 +37,9 @@ export function AccountHomeScreen({ navigation }: Props) {
   return (
     <Screen scroll>
       <View style={styles.header}>
-        <Text style={typography.title}>{user.nome}</Text>
+        <Text style={typography.title} accessibilityRole="header">
+          {user.nome}
+        </Text>
         <Text style={typography.caption}>{user.email}</Text>
         {user.cpf ? <Text style={typography.caption}>CPF {formatarCPF(user.cpf)}</Text> : null}
       </View>

@@ -29,7 +29,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     favicon: "./assets/favicon.png",
   },
-  plugins: ["expo-secure-store", "expo-font"],
+  plugins: [
+    "expo-secure-store",
+    "expo-font",
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/splash-icon.png",
+        imageWidth: 180,
+        resizeMode: "contain",
+        backgroundColor: "#ffffff",
+      },
+    ],
+  ],
   extra: {
     apiUrl: API_URL,
   },

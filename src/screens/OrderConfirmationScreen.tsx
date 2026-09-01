@@ -19,7 +19,9 @@ export function OrderConfirmationScreen({ route, navigation }: Props) {
         <View style={styles.badge}>
           <Ionicons name="checkmark" size={40} color={colors.primaryText} />
         </View>
-        <Text style={styles.title}>Pedido #{id_pedido} criado</Text>
+        <Text style={styles.title} accessibilityRole="header">
+          Pedido #{id_pedido} criado
+        </Text>
         <Text style={styles.message}>
           Status: <Text style={styles.status}>aguardando pagamento</Text>.{"\n"}
           Este app não processa pagamento — acompanhe o pedido em “Conta → Meus pedidos”.

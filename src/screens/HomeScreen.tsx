@@ -56,7 +56,9 @@ export function HomeScreen() {
       >
         <View style={styles.hero}>
           <Text style={styles.heroKicker}>AGNUS</Text>
-          <Text style={styles.heroTitle}>Vestuário e calçados com a sua cara</Text>
+          <Text style={styles.heroTitle} accessibilityRole="header">
+            Vestuário e calçados com a sua cara
+          </Text>
           <View style={styles.heroAction}>
             <Button title="Ver catálogo" onPress={() => openCatalog()} />
           </View>

@@ -5,6 +5,21 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Polimento
+
+- **Offline básico**: cache do React Query persistido no `AsyncStorage` (24h) via
+  `PersistQueryClientProvider`; `gcTime` de 24h e `refetchOnReconnect`. Telas já
+  visitadas abrem com os últimos dados sem rede.
+- `OfflineBanner`: faixa no topo quando o aparelho perde conexão (`NetInfo`).
+- `ErrorBoundary` em volta da navegação — erro de render não deixa tela branca.
+- Splash controlado (`expo-splash-screen`): fica na tela até o `/auth/me` do boot
+  resolver, sem flash.
+- Pull-to-refresh também na tela de Produto e no detalhe de pedido.
+- Acessibilidade: `accessibilityRole="header"` nos títulos de tela e nos estados
+  de vazio/erro (os componentes interativos já tinham role/label/state).
+- `eas.json` com perfis `development` / `preview` / `production` e README com o
+  passo a passo do `eas build`.
+
 ### Área do cliente
 
 - Aba **Conta** vira uma stack própria (`AccountStack`) com menu e sub-telas.

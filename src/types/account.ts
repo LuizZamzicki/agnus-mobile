@@ -26,6 +26,34 @@ export interface AddressInput {
   principal?: boolean;
 }
 
+export type ContactType = "telefone" | "celular" | "email" | "outro";
+
+/** Linha de `usuario_contatos`. */
+export interface UserContact {
+  id_usuario_contato: number;
+  id_usuario: number;
+  tipo: ContactType;
+  valor: string;
+  principal: boolean | number;
+}
+
+export interface ContactInput {
+  tipo: ContactType;
+  valor: string;
+  principal?: boolean;
+}
+
+export interface ProfileInput {
+  nome: string;
+  email: string;
+  cpf: string;
+}
+
+export interface PasswordChangeInput {
+  senhaAtual: string;
+  novaSenha: string;
+}
+
 export type OrderStatus =
   | "aguardando_calculo_frete"
   | "aguardando_pagamento"

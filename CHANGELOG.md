@@ -5,6 +5,25 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Área do cliente
+
+- Aba **Conta** vira uma stack própria (`AccountStack`) com menu e sub-telas.
+- **Meus dados** (`PUT /users/:id`): editar nome, e-mail e CPF; `AuthContext`
+  ganha `updateProfile` e atualiza o usuário em memória na hora.
+- **Trocar senha** (`PATCH /users/:id/password`): senha atual + nova (com medidor
+  de força) + confirmação; valida "diferente da atual" no cliente e exibe a
+  mensagem do back (ex.: senha já usada).
+- **Endereços** (CRUD): lista com editar/excluir (confirmação), formulário
+  reaproveitando `AddressForm` para criar e editar.
+- **Contatos** (CRUD): lista + formulário com tipo (`celular`/`telefone`/`email`/
+  `outro`), valor e "principal".
+- **Meus pedidos**: lista (`GET /orders?id_usuario=`) com status e total; detalhe
+  (`GET /order-items/:id_pedido`) com endereço de entrega e itens.
+- `src/api/account.ts` completo (endereços, contatos, perfil, senha);
+  `src/hooks/account.ts` (`useAddresses`, `useContacts`, `useOrders`,
+  `useOrderItems`).
+- Componentes: `MenuRow`, `StatusBadge`; helper `formatarData`.
+
 ### Carrinho e checkout
 
 - `src/api/cart.ts`: orquestração do carrinho no cliente (o back não tem "meu

@@ -56,6 +56,28 @@ npx expo start
 - `a` abre no Android, `i` no iOS, `w` no navegador.
 - Ou escaneie o QR code com o Expo Go (device físico → use o IP da máquina na URL).
 
+Tudo roda no **Expo Go** — nenhuma dependência exige dev build.
+
+## Build de teste (EAS)
+
+`eas.json` traz os perfis `development`, `preview` e `production`. Para um APK
+interno de teste:
+
+```bash
+npm i -g eas-cli   # uma vez
+eas login
+eas build --profile preview --platform android
+```
+
+Ajuste `EXPO_PUBLIC_API_URL` no perfil (`eas.json`) antes de buildar.
+
+## Offline
+
+O cache do React Query é persistido no `AsyncStorage` (24h), então ao reabrir o
+app sem rede as telas já visitadas mostram os últimos dados; uma faixa no topo
+avisa que está offline. Ações de escrita (carrinho, checkout, conta) precisam de
+conexão.
+
 ## Scripts
 
 | Script                            | O quê                     |

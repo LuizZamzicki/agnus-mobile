@@ -1,7 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
+import { updateProfile as updateProfileApi } from "../api/account";
 import * as authApi from "../api/auth";
 import { ApiError } from "../api/client";
+import type { ProfileInput } from "../types/account";
 import { isAdmin, type LoginInput, type RegisterInput, type User } from "../types/user";
 
 import { AdminNotAllowedError } from "./errors";
@@ -16,6 +18,8 @@ interface AuthContextValue {
   signUp: (input: RegisterInput) => Promise<void>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
+  /** Atualiza os dados do usuário (`PUT /users/:id`) e o estado local. */
+  updateProfile: (input: ProfileInput) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -80,6 +84,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await authApi.register(input);
   }, []);
 
+  const updateProfile = useCallback(
+    async (input: ProfileInput) => {
+      if (!user) throw new Error("Sem sessão.");
+      const updated = await updateProfileApi(user.id_usuario, input);
+      setUser(updated);
+    },
+    [user],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -89,8 +102,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signUp,
       signOut,
       refresh,
+      updateProfile,
     }),
-    [user, initializing, signIn, signUp, signOut, refresh],
+    [user, initializing, signIn, signUp, signOut, refresh, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

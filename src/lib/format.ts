@@ -14,4 +14,13 @@ export function formatarMoeda(valor: unknown): string {
   }).format(numero);
 }
 
+/** Data legível em pt-BR (`dd/mm/aaaa`); vazio se não parsear. */
+export function formatarData(valor: string | null | undefined): string {
+  if (!valor) return "";
+  const data = new Date(valor);
+  return Number.isNaN(data.getTime())
+    ? ""
+    : data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 export { numeroSeguro };

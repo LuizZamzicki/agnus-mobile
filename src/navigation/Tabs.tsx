@@ -3,12 +3,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 
 import { useCart } from "../cart/CartContext";
-import { AccountScreen } from "../screens/AccountScreen";
 import { CartScreen } from "../screens/CartScreen";
 import { CatalogScreen } from "../screens/CatalogScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { colors } from "../theme";
 
+import { AccountStack } from "./AccountStack";
 import type { TabsParamList } from "./types";
 
 const Tab = createBottomTabNavigator<TabsParamList>();
@@ -41,7 +41,11 @@ export function Tabs() {
         component={CartScreen}
         options={{ title: "Carrinho", tabBarBadge: count > 0 ? count : undefined }}
       />
-      <Tab.Screen name="Account" component={AccountScreen} options={{ title: "Conta" }} />
+      <Tab.Screen
+        name="Account"
+        component={AccountStack}
+        options={{ title: "Conta", headerShown: false }}
+      />
     </Tab.Navigator>
   );
 }

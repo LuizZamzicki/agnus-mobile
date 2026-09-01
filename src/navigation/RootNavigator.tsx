@@ -4,8 +4,10 @@ import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
+import { CheckoutScreen } from "../screens/CheckoutScreen";
 import { LoginScreen } from "../screens/LoginScreen";
 import { NotFoundScreen } from "../screens/NotFoundScreen";
+import { OrderConfirmationScreen } from "../screens/OrderConfirmationScreen";
 import { ProductScreen } from "../screens/ProductScreen";
 import { colors } from "../theme";
 
@@ -55,6 +57,16 @@ export function RootNavigator() {
           name="Login"
           component={LoginScreen}
           options={{ title: "Entrar", presentation: "modal" }}
+        />
+        <Stack.Screen
+          name="Checkout"
+          component={CheckoutScreen}
+          options={{ title: "Finalizar compra" }}
+        />
+        <Stack.Screen
+          name="OrderConfirmation"
+          component={OrderConfirmationScreen}
+          options={{ title: "Pedido confirmado", headerBackVisible: false, gestureEnabled: false }}
         />
         <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: "Ops" }} />
       </Stack.Navigator>

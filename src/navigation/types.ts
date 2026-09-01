@@ -11,7 +11,7 @@ export type RootStackParamList = {
   Tabs: NavigatorScreenParams<TabsParamList> | undefined;
   Product: { id: number };
   Login: { redirect?: keyof RootStackParamList } | undefined;
-  Checkout: undefined;
+  Checkout: { itemIds: number[] };
   OrderConfirmation: { id_pedido: number };
   NotFound: undefined;
 };

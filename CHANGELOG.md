@@ -5,6 +5,33 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Carrinho e checkout
+
+- `src/api/cart.ts`: orquestração do carrinho no cliente (o back não tem "meu
+  carrinho") — `ensureCart` (`GET /carts?id_usuario=` ou `POST /carts`),
+  `getCartItems`, `addCartItem`, `updateCartItemQuantity`, `removeCartItem`.
+- `CartContext` reescrito sobre React Query: query do carrinho + itens por
+  `id_carrinho`, mutations de adicionar/alterar/remover que invalidam a lista,
+  soma para o badge da tab, limpeza do cache ao deslogar. Adicionar item com a
+  mesma cor+grade soma a quantidade (o `POST` do back não faz merge).
+- `src/api/orders.ts` + `src/api/account.ts`: `createOrder`, `createOrderItem`,
+  `getUserAddresses`, `createUserAddress` (e `getUserOrders`/`getOrderItems` para
+  a próxima fase).
+- **Carrinho**: seleção por item, `QtyStepper`, remover com `ConfirmDialog`,
+  subtotal dos selecionados, "Finalizar compra". Estados de sem sessão / vazio /
+  erro / carregando.
+- **Checkout**: escolha de endereço (ou `AddressForm` inline quando não há nenhum),
+  resumo dos itens, total com frete grátis. `POST /orders` +
+  `POST /order-items` por item, sequencial e **não-transacional** — se um item
+  falha, mostra o erro e mantém o carrinho. Sucesso remove os itens comprados e
+  vai para a confirmação.
+- **Confirmação de pedido**: número do pedido, status "aguardando pagamento"
+  (não há gateway), atalhos para "Meus pedidos" e a loja.
+- Tela de produto: "Adicionar ao carrinho" agora persiste via `CartContext`
+  (sem sessão continua indo para o Login).
+- Componentes: `QtyStepper`, `Checkbox`, `ConfirmDialog`, `CartItemRow`,
+  `AddressForm`; helper `formatarCEP`/`cepValido`.
+
 ### Autenticação
 
 - Tela de Login/Cadastro em abas (`SegmentedTabs`), com `react-hook-form` + `zod`.

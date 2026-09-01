@@ -5,6 +5,16 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Infra
+
+- **Expo SDK 57 → 56** (`react-native` 0.86 → 0.85). O `create-expo-app` gerou o
+  projeto na SDK 57, ainda não suportada pelo Expo Go da App Store (a maior tag
+  `sdk-XX` publicada é a 56). Alinhado com `npx expo install --fix`;
+  `eslint-config-expo` e `typescript` (~5.9) ajustados junto.
+- `expo-doctor` acusa a regressão de memória do Hermes V1 na SDK 56 (corrigida só
+  na 57) — mantido de propósito para rodar no Expo Go; é regressão de memória, não
+  quebra funcional.
+
 ### Polimento
 
 - **Offline básico**: cache do React Query persistido no `AsyncStorage` (24h) via

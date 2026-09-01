@@ -17,7 +17,9 @@ export function EmptyState({ title, message, loading, actionLabel, onAction }: E
   return (
     <View style={styles.container}>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {title}
+      </Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
       {actionLabel && onAction ? (
         <View style={styles.action}>

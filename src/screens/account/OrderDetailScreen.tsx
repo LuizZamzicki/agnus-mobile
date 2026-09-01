@@ -1,6 +1,13 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
@@ -22,7 +29,19 @@ export function OrderDetailScreen({ route }: Props) {
   const address = addresses.data?.find((a) => a.id_usuario_endereco === order?.id_usuario_endereco);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={items.isRefetching || orders.isRefetching}
+          onRefresh={() => {
+            items.refetch();
+            orders.refetch();
+          }}
+        />
+      }
+    >
       {order ? (
         <View style={styles.section}>
           <View style={styles.headerRow}>

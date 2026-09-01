@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ApiError } from "../api/client";
@@ -32,7 +32,7 @@ export function ProductScreen({ route, navigation }: Props) {
   const { id } = route.params;
   const { isAuthenticated } = useAuth();
   const cart = useCart();
-  const { data, isPending, isError, error, refetch } = useProductBundle(id);
+  const { data, isPending, isError, error, refetch, isRefetching } = useProductBundle(id);
   const categories = useCategories();
 
   const [color, setColor] = useState<ProductColor | undefined>();
@@ -98,12 +98,17 @@ export function ProductScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}
+      >
         <PhotoCarousel photos={photos} />
 
         <View style={styles.body}>
           {categoriaNome ? <Text style={styles.category}>{categoriaNome}</Text> : null}
-          <Text style={styles.name}>{produto.nome}</Text>
+          <Text style={styles.name} accessibilityRole="header">
+            {produto.nome}
+          </Text>
 
           {avaliacoes.length > 0 ? <Rating value={media} count={avaliacoes.length} /> : null}
 

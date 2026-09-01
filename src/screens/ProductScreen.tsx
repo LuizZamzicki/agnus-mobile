@@ -3,6 +3,9 @@ import React, { useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ApiError } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
+import { useCart } from "../cart/CartContext";
 import { Button } from "../components/Button";
 import { ColorPicker } from "../components/ColorPicker";
 import { EmptyState } from "../components/EmptyState";
@@ -11,7 +14,6 @@ import { Price } from "../components/Price";
 import { PhotoCarousel } from "../components/PhotoCarousel";
 import { Rating } from "../components/Rating";
 import { SizePicker } from "../components/SizePicker";
-import { useAuth } from "../auth/AuthContext";
 import { useCategories, useProductBundle } from "../hooks/products";
 import {
   deduplicarUrls,
@@ -29,11 +31,13 @@ type Props = NativeStackScreenProps<RootStackParamList, "Product">;
 export function ProductScreen({ route, navigation }: Props) {
   const { id } = route.params;
   const { isAuthenticated } = useAuth();
+  const cart = useCart();
   const { data, isPending, isError, error, refetch } = useProductBundle(id);
   const categories = useCategories();
 
   const [color, setColor] = useState<ProductColor | undefined>();
   const [grade, setGrade] = useState<ProductGrade | undefined>();
+  const [adding, setAdding] = useState(false);
 
   const photos = useMemo(
     () => deduplicarUrls((data?.fotos ?? []).map((f) => normalizarUrlImagem(f.caminho_url))),
@@ -59,22 +63,37 @@ export function ProductScreen({ route, navigation }: Props) {
 
   const { produto, cores, grades, avaliacoes } = data;
   const categoriaNome = categories.data?.find((c) => c.id_categoria === produto.id_categoria)?.nome;
+  const buyable = cores.length > 0 && grades.length > 0;
   const needsColor = cores.length > 0 && !color;
   const needsGrade = grades.length > 0 && !grade;
-  const hasVariation =
-    cores.some((c) => numeroSeguro(c.acrescimo, 0) > 0) ||
-    grades.some((g) => numeroSeguro(g.acrescimo, 0) > 0) ||
-    cores.length > 0 ||
-    grades.length > 0;
+  const hasVariation = cores.length > 0 || grades.length > 0;
   const preco = precoComVariacoes(produto.preco_base, color, grade);
 
-  const onAddToCart = () => {
-    if (needsColor || needsGrade) return;
+  const onAddToCart = async () => {
+    if (needsColor || needsGrade || !buyable || !color || !grade) return;
     if (!isAuthenticated) {
       navigation.navigate("Login", { redirect: "Product" });
       return;
     }
-    Alert.alert("Quase lá", "A montagem do carrinho entra na próxima etapa do app.");
+    setAdding(true);
+    try {
+      await cart.addItem({
+        id_produto_cor: color.id_produto_cor,
+        id_produto_grade: grade.id_produto_grade,
+        quantidade: 1,
+      });
+      Alert.alert("Adicionado ao carrinho", produto.nome, [
+        { text: "Continuar comprando", style: "cancel" },
+        { text: "Ver carrinho", onPress: () => navigation.navigate("Tabs", { screen: "Cart" }) },
+      ]);
+    } catch (err) {
+      Alert.alert(
+        "Ops",
+        err instanceof ApiError ? err.message : "Não foi possível adicionar ao carrinho.",
+      );
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
@@ -105,7 +124,9 @@ export function ProductScreen({ route, navigation }: Props) {
       </ScrollView>
 
       <View style={styles.bar}>
-        {needsColor || needsGrade ? (
+        {!buyable ? (
+          <Text style={styles.hint}>Produto sem opções de compra no momento</Text>
+        ) : needsColor || needsGrade ? (
           <Text style={styles.hint}>
             Selecione {needsColor ? "a cor" : ""}
             {needsColor && needsGrade ? " e " : ""}
@@ -115,7 +136,8 @@ export function ProductScreen({ route, navigation }: Props) {
         <Button
           title={isAuthenticated ? "Adicionar ao carrinho" : "Entrar para comprar"}
           onPress={onAddToCart}
-          disabled={needsColor || needsGrade}
+          loading={adding}
+          disabled={!buyable || needsColor || needsGrade}
         />
       </View>
     </SafeAreaView>

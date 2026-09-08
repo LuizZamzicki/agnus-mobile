@@ -13,11 +13,13 @@ import { MenuRow } from "../../components/MenuRow";
 import { Screen } from "../../components/Screen";
 import { formatarCPF } from "../../lib/cpf";
 import type { AccountStackParamList, RootStackParamList } from "../../navigation/types";
-import { colors, spacing, typography } from "../../theme";
+import { useTheme, useThemedStyles, type Theme } from "../../theme";
 
 type Props = NativeStackScreenProps<AccountStackParamList, "AccountHome">;
 
 export function AccountHomeScreen({ navigation }: Props) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const rootNavigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, isAuthenticated, signOut } = useAuth();
 
@@ -71,6 +73,12 @@ export function AccountHomeScreen({ navigation }: Props) {
           label="Meus pedidos"
           onPress={() => navigation.navigate("Orders")}
         />
+        <MenuRow
+          icon="contrast-outline"
+          label="Aparência"
+          description="Tema claro, escuro ou do sistema"
+          onPress={() => navigation.navigate("Appearance")}
+        />
       </View>
 
       <Button title="Sair" variant="danger" onPress={signOut} style={styles.signOut} />
@@ -78,8 +86,9 @@ export function AccountHomeScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  header: { gap: 2, paddingBottom: spacing.md },
-  menu: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
-  signOut: { marginTop: spacing.xl },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    header: { gap: 2, paddingBottom: spacing.md },
+    menu: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+    signOut: { marginTop: spacing.xl },
+  });

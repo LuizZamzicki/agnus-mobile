@@ -10,7 +10,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { useContacts } from "../../hooks/account";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, radius, spacing, typography } from "../../theme";
+import { useTheme, useThemedStyles, type Theme } from "../../theme";
 import type { ContactType } from "../../types/account";
 
 const TYPE_LABEL: Record<ContactType, string> = {
@@ -23,6 +23,8 @@ const TYPE_LABEL: Record<ContactType, string> = {
 type Props = NativeStackScreenProps<AccountStackParamList, "Contacts">;
 
 export function ContactsScreen({ navigation }: Props) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const queryClient = useQueryClient();
   const contacts = useContacts();
   const [toDelete, setToDelete] = useState<number | null>(null);
@@ -104,27 +106,28 @@ export function ContactsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  cardBody: { flex: 1, gap: 2 },
-  cardTitle: { ...typography.body, fontWeight: "600" },
-  cardActions: { flexDirection: "row", gap: spacing.md },
-  action: { fontSize: 13, fontWeight: "600", color: colors.text },
-  danger: { color: colors.danger },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    cardBody: { flex: 1, gap: 2 },
+    cardTitle: { ...typography.body, fontWeight: "600" },
+    cardActions: { flexDirection: "row", gap: spacing.md },
+    action: { fontSize: 13, fontWeight: "600", color: colors.text },
+    danger: { color: colors.danger },
+    footer: {
+      padding: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+  });

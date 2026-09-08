@@ -8,11 +8,13 @@ import { StatusBadge } from "../../components/StatusBadge";
 import { useOrders } from "../../hooks/account";
 import { formatarData, formatarMoeda } from "../../lib/format";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, radius, spacing, typography } from "../../theme";
+import { useTheme, useThemedStyles, type Theme } from "../../theme";
 
 type Props = NativeStackScreenProps<AccountStackParamList, "Orders">;
 
 export function OrdersScreen({ navigation }: Props) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const orders = useOrders();
 
   if (orders.isError) {
@@ -56,16 +58,17 @@ export function OrdersScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  list: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardTitle: { ...typography.body, fontWeight: "600" },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    list: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
+    card: {
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      gap: spacing.xs,
+    },
+    cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    cardTitle: { ...typography.body, fontWeight: "600" },
+  });

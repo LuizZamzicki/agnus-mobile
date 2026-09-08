@@ -10,12 +10,13 @@ import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { useAddresses } from "../../hooks/account";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, radius, spacing, typography } from "../../theme";
+import { useTheme, useThemedStyles, type Theme } from "../../theme";
 import type { UserAddress } from "../../types/account";
 
 type Props = NativeStackScreenProps<AccountStackParamList, "Addresses">;
 
 export function AddressesScreen({ navigation }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const queryClient = useQueryClient();
   const addresses = useAddresses();
   const [toDelete, setToDelete] = useState<number | null>(null);
@@ -91,6 +92,8 @@ function AddressCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const linha1 = [address.logradouro, address.numero].filter(Boolean).join(", ");
   const linha2 = [address.bairro, [address.cidade, address.estado].filter(Boolean).join("/")]
     .filter(Boolean)
@@ -118,25 +121,26 @@ function AddressCard({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  cardBody: { gap: 2 },
-  cardTitle: { ...typography.body, fontWeight: "600" },
-  badge: { fontSize: 11, fontWeight: "700", color: colors.accent, textTransform: "uppercase" },
-  cardActions: { flexDirection: "row", gap: spacing.lg },
-  action: { fontSize: 13, fontWeight: "600", color: colors.text },
-  danger: { color: colors.danger },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
+    card: {
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    cardBody: { gap: 2 },
+    cardTitle: { ...typography.body, fontWeight: "600" },
+    badge: { fontSize: 11, fontWeight: "700", color: colors.accent, textTransform: "uppercase" },
+    cardActions: { flexDirection: "row", gap: spacing.lg },
+    action: { fontSize: 13, fontWeight: "600", color: colors.text },
+    danger: { color: colors.danger },
+    footer: {
+      padding: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+  });

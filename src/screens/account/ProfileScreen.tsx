@@ -13,7 +13,7 @@ import { TextField } from "../../components/TextField";
 import { formatarCPF, validarCPF } from "../../lib/cpf";
 import { emailValido } from "../../lib/email";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, spacing } from "../../theme";
+import { useThemedStyles, type Theme } from "../../theme";
 
 const schema = z.object({
   nome: z.string().trim().min(3, "Informe seu nome completo."),
@@ -26,6 +26,7 @@ type ProfileValues = z.infer<typeof schema>;
 type Props = NativeStackScreenProps<AccountStackParamList, "Profile">;
 
 export function ProfileScreen(_props: Props) {
+  const styles = useThemedStyles(makeStyles);
   const { user, updateProfile } = useAuth();
   const [banner, setBanner] = useState<{ tone: "success" | "error"; message: string } | null>(null);
 
@@ -121,8 +122,9 @@ export function ProfileScreen(_props: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md },
-  submit: { marginTop: spacing.sm },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.md },
+    submit: { marginTop: spacing.sm },
+  });

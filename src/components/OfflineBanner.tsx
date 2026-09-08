@@ -4,10 +4,11 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors, spacing } from "../theme";
+import { useThemedStyles, type Theme } from "../theme";
 
 /** Faixa fixa no topo quando o aparelho está sem conexão. */
 export function OfflineBanner() {
+  const styles = useThemedStyles(makeStyles);
   const [offline, setOffline] = useState(false);
 
   useEffect(() => {
@@ -27,13 +28,14 @@ export function OfflineBanner() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { backgroundColor: colors.text },
-  text: {
-    color: colors.primaryText,
-    fontSize: 12,
-    fontWeight: "600",
-    textAlign: "center",
-    paddingVertical: spacing.xs,
-  },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { backgroundColor: colors.text },
+    text: {
+      color: colors.primaryText,
+      fontSize: 12,
+      fontWeight: "600",
+      textAlign: "center",
+      paddingVertical: spacing.xs,
+    },
+  });

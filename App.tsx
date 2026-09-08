@@ -9,8 +9,10 @@ import { AuthProvider, useAuth } from "./src/auth/AuthContext";
 import { CartProvider } from "./src/cart/CartContext";
 import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { OfflineBanner } from "./src/components/OfflineBanner";
+import { ToastProvider } from "./src/components/Toast";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { asyncStoragePersister, queryClient } from "./src/query/queryClient";
+import { ThemeProvider, useTheme } from "./src/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -22,26 +24,35 @@ function SplashGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function ThemedStatusBar() {
+  const { scheme } = useTheme();
+  return <StatusBar style={scheme === "dark" ? "light" : "dark"} />;
+}
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ErrorBoundary>
-          <PersistQueryClientProvider
-            client={queryClient}
-            persistOptions={{ persister: asyncStoragePersister, maxAge: 24 * 60 * 60 * 1000 }}
-          >
-            <AuthProvider>
-              <CartProvider>
-                <StatusBar style="dark" />
-                <OfflineBanner />
-                <SplashGate>
-                  <RootNavigator />
-                </SplashGate>
-              </CartProvider>
-            </AuthProvider>
-          </PersistQueryClientProvider>
-        </ErrorBoundary>
+        <ThemeProvider>
+          <ErrorBoundary>
+            <PersistQueryClientProvider
+              client={queryClient}
+              persistOptions={{ persister: asyncStoragePersister, maxAge: 24 * 60 * 60 * 1000 }}
+            >
+              <AuthProvider>
+                <CartProvider>
+                  <ToastProvider>
+                    <ThemedStatusBar />
+                    <OfflineBanner />
+                    <SplashGate>
+                      <RootNavigator />
+                    </SplashGate>
+                  </ToastProvider>
+                </CartProvider>
+              </AuthProvider>
+            </PersistQueryClientProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

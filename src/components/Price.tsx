@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TextStyle } from "react-native";
 
 import { formatarMoeda } from "../lib/format";
-import { colors } from "../theme";
+import { useThemedStyles, type Theme } from "../theme";
 
 interface PriceProps {
   value: unknown;
@@ -12,6 +12,7 @@ interface PriceProps {
 }
 
 export function Price({ value, from, style }: PriceProps) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Text style={[styles.price, style]}>
       {from ? <Text style={styles.from}>a partir de </Text> : null}
@@ -20,7 +21,8 @@ export function Price({ value, from, style }: PriceProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  price: { fontSize: 17, fontWeight: "700", color: colors.text },
-  from: { fontSize: 12, fontWeight: "400", color: colors.textMuted },
-});
+const makeStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    price: { fontSize: 17, fontWeight: "700", color: colors.text },
+    from: { fontSize: 12, fontWeight: "400", color: colors.textMuted },
+  });

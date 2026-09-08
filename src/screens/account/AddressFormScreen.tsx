@@ -11,12 +11,13 @@ import { FormBanner } from "../../components/FormBanner";
 import { useAddresses } from "../../hooks/account";
 import { formatarCEP } from "../../lib/cep";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, spacing } from "../../theme";
+import { useThemedStyles, type Theme } from "../../theme";
 import type { AddressInput } from "../../types/account";
 
 type Props = NativeStackScreenProps<AccountStackParamList, "AddressForm">;
 
 export function AddressFormScreen({ route, navigation }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const editingId = route.params?.id;
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -29,6 +30,7 @@ export function AddressFormScreen({ route, navigation }: Props) {
   }, [navigation, editingId]);
 
   const editing = addresses.data?.find((a) => a.id_usuario_endereco === editingId);
+  const isFirstAddress = !editingId && !addresses.isPending && (addresses.data?.length ?? 0) === 0;
 
   const onSubmit = async (input: AddressInput) => {
     if (!user) return;
@@ -57,6 +59,7 @@ export function AddressFormScreen({ route, navigation }: Props) {
           key={editing?.id_usuario_endereco ?? "new"}
           submitLabel={editingId ? "Salvar alterações" : "Adicionar endereço"}
           submitting={saving}
+          firstAddress={isFirstAddress}
           onSubmit={onSubmit}
           defaultValues={
             editing
@@ -67,10 +70,10 @@ export function AddressFormScreen({ route, navigation }: Props) {
                   complemento: editing.complemento ?? "",
                   bairro: editing.bairro ?? "",
                   cidade: editing.cidade ?? "",
-                  estado: editing.estado ?? "",
+                  estado: (editing.estado ?? "").toUpperCase(),
                   principal: editing.principal === true || editing.principal === 1,
                 }
-              : undefined
+              : { principal: isFirstAddress }
           }
         />
       </ScrollView>
@@ -78,7 +81,8 @@ export function AddressFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.md },
+  });

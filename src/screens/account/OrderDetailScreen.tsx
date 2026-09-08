@@ -15,11 +15,13 @@ import { StatusBadge } from "../../components/StatusBadge";
 import { useAddresses, useOrderItems, useOrders } from "../../hooks/account";
 import { formatarData, formatarMoeda, numeroSeguro } from "../../lib/format";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, radius, spacing, typography } from "../../theme";
+import { useTheme, useThemedStyles, type Theme } from "../../theme";
 
 type Props = NativeStackScreenProps<AccountStackParamList, "OrderDetail">;
 
 export function OrderDetailScreen({ route }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id_pedido } = route.params;
   const orders = useOrders();
   const addresses = useAddresses();
@@ -114,28 +116,29 @@ export function OrderDetailScreen({ route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.lg },
-  section: { gap: spacing.xs },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  sectionTitle: { ...typography.heading },
-  loading: { paddingVertical: spacing.lg },
-  items: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  itemRow: { flexDirection: "row", justifyContent: "space-between", gap: spacing.sm },
-  itemInfo: { flex: 1, gap: 2 },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    paddingTop: spacing.md,
-  },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.lg },
+    section: { gap: spacing.xs },
+    headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    sectionTitle: { ...typography.heading },
+    loading: { paddingVertical: spacing.lg },
+    items: {
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    itemRow: { flexDirection: "row", justifyContent: "space-between", gap: spacing.sm },
+    itemInfo: { flex: 1, gap: 2 },
+    totalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      paddingTop: spacing.md,
+    },
+  });

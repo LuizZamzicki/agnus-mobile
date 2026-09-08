@@ -15,7 +15,7 @@ import { EmptyState } from "../components/EmptyState";
 import { ErrorState } from "../components/ErrorState";
 import { formatarMoeda, numeroSeguro } from "../lib/format";
 import type { RootStackParamList, TabsParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 type Nav = CompositeNavigationProp<
   BottomTabNavigationProp<TabsParamList, "Cart">,
@@ -23,6 +23,8 @@ type Nav = CompositeNavigationProp<
 >;
 
 export function CartScreen() {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const navigation = useNavigation<Nav>();
   const { isAuthenticated } = useAuth();
   const cart = useCart();
@@ -137,15 +139,16 @@ export function CartScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  list: { paddingHorizontal: spacing.lg, flexGrow: 1 },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.background,
-    gap: spacing.sm,
-  },
-  summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    list: { paddingHorizontal: spacing.lg, flexGrow: 1 },
+    footer: {
+      padding: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+      gap: spacing.sm,
+    },
+    summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  });

@@ -3,7 +3,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { corDeFundo } from "../lib/produtos";
-import { colors, radius, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { ProductColor } from "../types/product";
 
 interface ColorPickerProps {
@@ -13,6 +13,8 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ colors: options, selectedId, onSelect }: ColorPickerProps) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const selected = options.find((c) => c.id_produto_cor === selectedId);
 
   return (
@@ -44,25 +46,26 @@ export function ColorPicker({ colors: options, selectedId, onSelect }: ColorPick
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: spacing.sm },
-  header: { flexDirection: "row", alignItems: "baseline", gap: spacing.sm },
-  selectedName: { ...typography.caption },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
-  swatchWrap: {
-    padding: 3,
-    borderRadius: radius.pill,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  swatchWrapActive: { borderColor: colors.primary },
-  swatch: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    wrap: { gap: spacing.sm },
+    header: { flexDirection: "row", alignItems: "baseline", gap: spacing.sm },
+    selectedName: { ...typography.caption },
+    row: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+    swatchWrap: {
+      padding: 3,
+      borderRadius: radius.pill,
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    swatchWrapActive: { borderColor: colors.primary },
+    swatch: {
+      width: 34,
+      height: 34,
+      borderRadius: radius.pill,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+  });

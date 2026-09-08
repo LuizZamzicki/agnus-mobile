@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatarMoeda, numeroSeguro } from "../lib/format";
-import { colors, radius, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { ProductGrade } from "../types/product";
 
 interface SizePickerProps {
@@ -12,6 +12,8 @@ interface SizePickerProps {
 }
 
 export function SizePicker({ grades, selectedId, onSelect }: SizePickerProps) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.wrap}>
       <Text style={typography.heading}>Tamanho</Text>
@@ -41,21 +43,22 @@ export function SizePicker({ grades, selectedId, onSelect }: SizePickerProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: spacing.sm },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
-  pill: {
-    minWidth: 52,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-  },
-  pillActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  label: { fontSize: 14, color: colors.text, fontWeight: "600" },
-  labelActive: { color: colors.primaryText },
-  extra: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
-});
+const makeStyles = ({ colors, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    wrap: { gap: spacing.sm },
+    row: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+    pill: {
+      minWidth: 52,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+    },
+    pillActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    label: { fontSize: 14, color: colors.text, fontWeight: "600" },
+    labelActive: { color: colors.primaryText },
+    extra: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  });

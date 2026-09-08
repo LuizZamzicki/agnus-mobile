@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet } from "react-native";
 
-import { colors, radius } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 interface CheckboxProps {
   checked: boolean;
@@ -11,6 +11,8 @@ interface CheckboxProps {
 }
 
 export function Checkbox({ checked, onToggle, label }: CheckboxProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       onPress={onToggle}
@@ -25,16 +27,17 @@ export function Checkbox({ checked, onToggle, label }: CheckboxProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  box: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.sm,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.background,
-  },
-  boxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
-});
+const makeStyles = ({ colors, radius }: Theme) =>
+  StyleSheet.create({
+    box: {
+      width: 24,
+      height: 24,
+      borderRadius: radius.sm,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.background,
+    },
+    boxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
+  });

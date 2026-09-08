@@ -4,7 +4,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { imagemPrincipal } from "../lib/produtos";
-import { colors, radius, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { CatalogProduct } from "../types/product";
 
 import { Price } from "./Price";
@@ -15,6 +15,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onPress }: ProductCardProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const uri = imagemPrincipal(product);
 
   return (
@@ -44,28 +46,34 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    backgroundColor: colors.background,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    gap: 2,
-  },
-  pressed: { opacity: 0.7 },
-  imageWrap: {
-    aspectRatio: 1,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    marginBottom: spacing.xs,
-  },
-  image: { width: "100%", height: "100%" },
-  category: { ...typography.caption, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 },
-  name: { ...typography.body, fontSize: 14, minHeight: 36 },
-  price: { fontSize: 15, marginTop: 2 },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    card: {
+      flex: 1,
+      backgroundColor: colors.background,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.sm,
+      gap: 2,
+    },
+    pressed: { opacity: 0.7 },
+    imageWrap: {
+      aspectRatio: 1,
+      borderRadius: radius.sm,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      overflow: "hidden",
+      marginBottom: spacing.xs,
+    },
+    image: { width: "100%", height: "100%" },
+    category: {
+      ...typography.caption,
+      fontSize: 11,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    name: { ...typography.body, fontSize: 14, minHeight: 36 },
+    price: { fontSize: 15, marginTop: 2 },
+  });

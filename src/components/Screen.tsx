@@ -2,7 +2,7 @@ import React from "react";
 import { RefreshControlProps, ScrollView, StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors, spacing } from "../theme";
+import { spacing, useThemedStyles, type Theme } from "../theme";
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -21,6 +21,7 @@ export function Screen({
   contentContainerStyle,
   refreshControl,
 }: ScreenProps) {
+  const styles = useThemedStyles(makeStyles);
   const padding = flush
     ? undefined
     : { paddingHorizontal: spacing.lg, paddingVertical: spacing.md };
@@ -43,7 +44,8 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  fill: { flex: 1 },
-});
+const makeStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    fill: { flex: 1 },
+  });

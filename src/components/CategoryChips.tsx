@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 
-import { colors, radius, spacing } from "../theme";
+import { useThemedStyles, type Theme } from "../theme";
 import type { Category } from "../types/product";
 
 interface CategoryChipsProps {
@@ -11,6 +11,7 @@ interface CategoryChipsProps {
 }
 
 export function CategoryChips({ categories, selectedId, onSelect }: CategoryChipsProps) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <ScrollView
       horizontal
@@ -31,6 +32,7 @@ export function CategoryChips({ categories, selectedId, onSelect }: CategoryChip
 }
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -43,17 +45,18 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
   );
 }
 
-const styles = StyleSheet.create({
-  content: { gap: spacing.sm, paddingVertical: spacing.xs, paddingRight: spacing.lg },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 13, color: colors.text },
-  chipTextActive: { color: colors.primaryText, fontWeight: "600" },
-});
+const makeStyles = ({ colors, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    content: { gap: spacing.sm, paddingVertical: spacing.xs, paddingRight: spacing.lg },
+    chip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.pill,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    chipText: { fontSize: 13, color: colors.text },
+    chipTextActive: { color: colors.primaryText, fontWeight: "600" },
+  });

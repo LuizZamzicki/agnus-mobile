@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,16 +16,24 @@ import { ErrorState } from "../components/ErrorState";
 import { FormBanner } from "../components/FormBanner";
 import { formatarMoeda, numeroSeguro } from "../lib/format";
 import type { RootStackParamList } from "../navigation/types";
-import { colors, radius, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { AddressInput, UserAddress } from "../types/account";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Checkout">;
 
 export function CheckoutScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { itemIds } = route.params;
   const { user } = useAuth();
   const userId = user?.id_usuario ?? 0;
   const cart = useCart();
+
+  // Revalida o carrinho ao entrar: evita finalizar sobre itens que já não existem no back.
+  const { refetch: refetchCart } = cart;
+  useEffect(() => {
+    refetchCart();
+  }, [refetchCart]);
 
   const items = useMemo(
     () => cart.items.filter((item) => itemIds.includes(item.id_carrinho_item)),
@@ -90,7 +98,12 @@ export function CheckoutScreen({ route, navigation }: Props) {
           quantidade: item.quantidade,
         });
       }
-      await cart.removeItems(items.map((item) => item.id_carrinho_item));
+      // Pedido criado. A limpeza do carrinho é best-effort: não pode reprovar a compra.
+      try {
+        await cart.removeItems(items.map((item) => item.id_carrinho_item));
+      } catch {
+        cart.refetch();
+      }
       navigation.replace("OrderConfirmation", { id_pedido: order.id_pedido });
     } catch (err) {
       setError(
@@ -207,6 +220,8 @@ function AddressOption({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const linha1 = [address.logradouro, address.numero].filter(Boolean).join(", ");
   const linha2 = [address.bairro, [address.cidade, address.estado].filter(Boolean).join("/")]
     .filter(Boolean)
@@ -234,55 +249,56 @@ function AddressOption({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: spacing.xxl },
-  sectionTitle: { ...typography.heading, marginTop: spacing.md },
-  loading: { paddingVertical: spacing.xl },
-  formWrap: { gap: spacing.sm },
-  link: { color: colors.text, fontWeight: "600", fontSize: 13, paddingVertical: spacing.xs },
-  addressList: { gap: spacing.sm },
-  addressCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  addressCardActive: { borderColor: colors.primary, backgroundColor: colors.background },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioActive: { borderColor: colors.primary },
-  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
-  addressText: { flex: 1, gap: 2 },
-  addressLine1: { ...typography.body, fontWeight: "600" },
-  badge: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: colors.accent,
-    textTransform: "uppercase",
-  },
-  items: { gap: spacing.xs },
-  itemRow: { flexDirection: "row", justifyContent: "space-between", gap: spacing.sm },
-  itemName: { ...typography.body, flex: 1, color: colors.textMuted },
-  itemValue: { ...typography.body },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.background,
-    gap: spacing.sm,
-  },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  disclaimer: { ...typography.caption, textAlign: "center" },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: spacing.xxl },
+    sectionTitle: { ...typography.heading, marginTop: spacing.md },
+    loading: { paddingVertical: spacing.xl },
+    formWrap: { gap: spacing.sm },
+    link: { color: colors.text, fontWeight: "600", fontSize: 13, paddingVertical: spacing.xs },
+    addressList: { gap: spacing.sm },
+    addressCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      padding: spacing.md,
+      borderRadius: radius.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    addressCardActive: { borderColor: colors.primary, backgroundColor: colors.background },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    radioActive: { borderColor: colors.primary },
+    radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
+    addressText: { flex: 1, gap: 2 },
+    addressLine1: { ...typography.body, fontWeight: "600" },
+    badge: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: colors.accent,
+      textTransform: "uppercase",
+    },
+    items: { gap: spacing.xs },
+    itemRow: { flexDirection: "row", justifyContent: "space-between", gap: spacing.sm },
+    itemName: { ...typography.body, flex: 1, color: colors.textMuted },
+    itemValue: { ...typography.body },
+    footer: {
+      padding: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+      gap: spacing.sm,
+    },
+    totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    disclaimer: { ...typography.caption, textAlign: "center" },
+  });

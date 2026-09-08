@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, radius } from "../theme";
+import { radius, useTheme } from "../theme";
 import type { OrderStatus } from "../types/account";
 
 const LABELS: Record<OrderStatus, string> = {
@@ -13,17 +13,17 @@ const LABELS: Record<OrderStatus, string> = {
   cancelado: "Cancelado",
 };
 
-const TONE: Record<OrderStatus, string> = {
-  aguardando_calculo_frete: colors.textMuted,
-  aguardando_pagamento: colors.accent,
-  pago: colors.success,
-  enviado: colors.success,
-  entregue: colors.success,
-  cancelado: colors.danger,
-};
-
 export function StatusBadge({ status }: { status: OrderStatus }) {
-  const color = TONE[status] ?? colors.textMuted;
+  const { colors } = useTheme();
+  const tone: Record<OrderStatus, string> = {
+    aguardando_calculo_frete: colors.textMuted,
+    aguardando_pagamento: colors.accent,
+    pago: colors.success,
+    enviado: colors.success,
+    entregue: colors.success,
+    cancelado: colors.danger,
+  };
+  const color = tone[status] ?? colors.textMuted;
   return (
     <View style={[styles.badge, { borderColor: color }]}>
       <Text style={[styles.text, { color }]}>{LABELS[status] ?? status}</Text>

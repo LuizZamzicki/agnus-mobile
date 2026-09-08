@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { colors, radius, spacing } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 interface SearchBarProps {
   value: string;
@@ -17,6 +17,8 @@ export function SearchBar({
   onSubmit,
   placeholder = "Buscar produtos",
 }: SearchBarProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.container}>
       <Ionicons name="search" size={18} color={colors.textMuted} />
@@ -41,17 +43,18 @@ export function SearchBar({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    height: 44,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  input: { flex: 1, fontSize: 15, color: colors.text, paddingVertical: 0 },
-});
+const makeStyles = ({ colors, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      paddingHorizontal: spacing.md,
+      height: 44,
+      borderRadius: radius.md,
+      backgroundColor: colors.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    input: { flex: 1, fontSize: 15, color: colors.text, paddingVertical: 0 },
+  });

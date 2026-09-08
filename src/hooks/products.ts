@@ -50,3 +50,21 @@ export function useProductBundle(id: number) {
     enabled: Number.isFinite(id) && id > 0,
   });
 }
+
+/**
+ * "Outros produtos" para a tela de produto: mesma categoria quando houver,
+ * senão os mais vendidos. Exclui o produto atual e limita a 10.
+ */
+export function useRelatedProducts(id: number, idCategoria: number | null, enabled = true) {
+  const query = useQuery({
+    queryKey: ["related-products", id, idCategoria],
+    queryFn: () =>
+      idCategoria ? getCatalog({ id_categoria: idCategoria, limit: 12 }) : getBestSellers(12),
+    enabled: enabled && Number.isFinite(id) && id > 0,
+    staleTime: 60_000,
+  });
+  const items = (query.data?.data ?? [])
+    .filter((product) => product.id_produto !== id)
+    .slice(0, 10);
+  return { ...query, items };
+}

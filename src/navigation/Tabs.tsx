@@ -6,7 +6,7 @@ import { useCart } from "../cart/CartContext";
 import { CartScreen } from "../screens/CartScreen";
 import { CatalogScreen } from "../screens/CatalogScreen";
 import { HomeScreen } from "../screens/HomeScreen";
-import { colors } from "../theme";
+import { useTheme } from "../theme";
 
 import { AccountStack } from "./AccountStack";
 import type { TabsParamList } from "./types";
@@ -21,6 +21,7 @@ const icons: Record<keyof TabsParamList, keyof typeof Ionicons.glyphMap> = {
 };
 
 export function Tabs() {
+  const { colors } = useTheme();
   const { count } = useCart();
 
   return (

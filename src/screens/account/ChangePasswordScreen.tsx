@@ -14,7 +14,7 @@ import { PasswordField } from "../../components/PasswordField";
 import { PasswordStrengthMeter } from "../../components/PasswordStrengthMeter";
 import { evaluatePasswordStrength } from "../../lib/passwordStrength";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, spacing } from "../../theme";
+import { useThemedStyles, type Theme } from "../../theme";
 
 const schema = z
   .object({
@@ -38,6 +38,7 @@ type PasswordValues = z.infer<typeof schema>;
 type Props = NativeStackScreenProps<AccountStackParamList, "ChangePassword">;
 
 export function ChangePasswordScreen({ navigation }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const { user } = useAuth();
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -126,8 +127,9 @@ export function ChangePasswordScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md },
-  submit: { marginTop: spacing.sm },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.md },
+    submit: { marginTop: spacing.sm },
+  });

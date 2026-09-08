@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 interface MenuRowProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -13,6 +13,8 @@ interface MenuRowProps {
 }
 
 export function MenuRow({ icon, label, description, onPress, danger }: MenuRowProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const tint = danger ? colors.danger : colors.text;
   return (
     <Pressable
@@ -30,17 +32,18 @@ export function MenuRow({ icon, label, description, onPress, danger }: MenuRowPr
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  pressed: { backgroundColor: colors.surface },
-  texts: { flex: 1, gap: 2 },
-  label: { ...typography.body, fontWeight: "600" },
-  description: { ...typography.caption },
-});
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.md,
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    pressed: { backgroundColor: colors.surface },
+    texts: { flex: 1, gap: 2 },
+    label: { ...typography.body, fontWeight: "600" },
+    description: { ...typography.caption },
+  });

@@ -1,4 +1,4 @@
-import { NavigationContainer, DefaultTheme, type LinkingOptions } from "@react-navigation/native";
+import { NavigationContainer, type LinkingOptions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
@@ -9,17 +9,12 @@ import { LoginScreen } from "../screens/LoginScreen";
 import { NotFoundScreen } from "../screens/NotFoundScreen";
 import { OrderConfirmationScreen } from "../screens/OrderConfirmationScreen";
 import { ProductScreen } from "../screens/ProductScreen";
-import { colors } from "../theme";
+import { useNavigationTheme, useTheme, useThemedStyles, type Theme } from "../theme";
 
 import { Tabs } from "./Tabs";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const navTheme = {
-  ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: colors.background, primary: colors.text },
-};
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ["agnusapp://"],
@@ -38,6 +33,9 @@ const linking: LinkingOptions<RootStackParamList> = {
 };
 
 export function RootNavigator() {
+  const { colors } = useTheme();
+  const navTheme = useNavigationTheme();
+  const styles = useThemedStyles(makeStyles);
   const { initializing } = useAuth();
 
   if (initializing) {
@@ -74,11 +72,12 @@ export function RootNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.background,
-  },
-});
+const makeStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    center: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.background,
+    },
+  });

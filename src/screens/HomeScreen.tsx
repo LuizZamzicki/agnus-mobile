@@ -21,7 +21,7 @@ import { ErrorState } from "../components/ErrorState";
 import { ProductCard } from "../components/ProductCard";
 import { useBestSellers, useCatalog, useCategories } from "../hooks/products";
 import type { RootStackParamList, TabsParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { CatalogProduct } from "../types/product";
 
 type Nav = CompositeNavigationProp<
@@ -30,6 +30,7 @@ type Nav = CompositeNavigationProp<
 >;
 
 export function HomeScreen() {
+  const styles = useThemedStyles(makeStyles);
   const navigation = useNavigation<Nav>();
   const bestSellers = useBestSellers(8);
   const highlights = useCatalog({});
@@ -119,6 +120,8 @@ function Rail({
   onPressItem: (p: CatalogProduct) => void;
   onSeeAll?: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const items = Array.isArray(query.data) ? query.data : (query.data?.data ?? []);
 
   return (
@@ -158,32 +161,33 @@ function Rail({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: spacing.xxl },
-  hero: {
-    margin: spacing.lg,
-    padding: spacing.xl,
-    borderRadius: 16,
-    backgroundColor: colors.surfaceAlt,
-    gap: spacing.sm,
-  },
-  heroKicker: { fontSize: 13, fontWeight: "700", letterSpacing: 2, color: colors.textMuted },
-  heroTitle: { ...typography.title, fontSize: 24 },
-  heroAction: { marginTop: spacing.sm, alignSelf: "flex-start" },
-  section: { marginTop: spacing.lg, gap: spacing.sm },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.lg,
-  },
-  sectionTitle: { ...typography.heading },
-  seeAll: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
-  categoryChips: { paddingHorizontal: spacing.lg },
-  rail: { paddingHorizontal: spacing.lg, gap: spacing.md },
-  railItem: { width: 150 },
-  railLoading: { paddingVertical: spacing.xl },
-  railError: { height: 180 },
-  railEmpty: { paddingHorizontal: spacing.lg, color: colors.textMuted, fontSize: 13 },
-});
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { paddingBottom: spacing.xxl },
+    hero: {
+      margin: spacing.lg,
+      padding: spacing.xl,
+      borderRadius: 16,
+      backgroundColor: colors.surfaceAlt,
+      gap: spacing.sm,
+    },
+    heroKicker: { fontSize: 13, fontWeight: "700", letterSpacing: 2, color: colors.textMuted },
+    heroTitle: { ...typography.title, fontSize: 24 },
+    heroAction: { marginTop: spacing.sm, alignSelf: "flex-start" },
+    section: { marginTop: spacing.lg, gap: spacing.sm },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      justifyContent: "space-between",
+      paddingHorizontal: spacing.lg,
+    },
+    sectionTitle: { ...typography.heading },
+    seeAll: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
+    categoryChips: { paddingHorizontal: spacing.lg },
+    rail: { paddingHorizontal: spacing.lg, gap: spacing.md },
+    railItem: { width: 150 },
+    railLoading: { paddingVertical: spacing.xl },
+    railError: { height: 180 },
+    railEmpty: { paddingHorizontal: spacing.lg, color: colors.textMuted, fontSize: 13 },
+  });

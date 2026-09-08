@@ -4,6 +4,7 @@ import React from "react";
 import { AccountHomeScreen } from "../screens/account/AccountHomeScreen";
 import { AddressesScreen } from "../screens/account/AddressesScreen";
 import { AddressFormScreen } from "../screens/account/AddressFormScreen";
+import { AppearanceScreen } from "../screens/account/AppearanceScreen";
 import { ChangePasswordScreen } from "../screens/account/ChangePasswordScreen";
 import { ContactFormScreen } from "../screens/account/ContactFormScreen";
 import { ContactsScreen } from "../screens/account/ContactsScreen";
@@ -42,6 +43,11 @@ export function AccountStack() {
         name="OrderDetail"
         component={OrderDetailScreen}
         options={{ title: "Pedido" }}
+      />
+      <Stack.Screen
+        name="Appearance"
+        component={AppearanceScreen}
+        options={{ title: "Aparência" }}
       />
     </Stack.Navigator>
   );

@@ -2,17 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, radius, spacing } from "../theme";
+import { radius, spacing, useTheme } from "../theme";
 
 type Tone = "error" | "success";
 
-const TONES: Record<Tone, { bg: string; fg: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  error: { bg: "#fdecea", fg: colors.danger, icon: "alert-circle" },
-  success: { bg: "#e7f4e8", fg: colors.success, icon: "checkmark-circle" },
-};
-
 export function FormBanner({ tone, message }: { tone: Tone; message: string }) {
-  const t = TONES[tone];
+  const { colors, scheme } = useTheme();
+  const dark = scheme === "dark";
+  const tones: Record<Tone, { bg: string; fg: string; icon: keyof typeof Ionicons.glyphMap }> = {
+    error: { bg: dark ? "#3a1f1d" : "#fdecea", fg: colors.danger, icon: "alert-circle" },
+    success: { bg: dark ? "#1e2f1f" : "#e7f4e8", fg: colors.success, icon: "checkmark-circle" },
+  };
+  const t = tones[tone];
   return (
     <View style={[styles.wrap, { backgroundColor: t.bg }]}>
       <Ionicons name={t.icon} size={18} color={t.fg} />

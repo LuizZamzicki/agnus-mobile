@@ -24,7 +24,7 @@ import { TextField } from "../../components/TextField";
 import { useContacts } from "../../hooks/account";
 import { emailValido } from "../../lib/email";
 import type { AccountStackParamList } from "../../navigation/types";
-import { colors, spacing, typography } from "../../theme";
+import { useTheme, useThemedStyles, type Theme } from "../../theme";
 import type { ContactType } from "../../types/account";
 
 const schema = z
@@ -50,6 +50,8 @@ const TYPE_OPTIONS: { value: ContactType; label: string }[] = [
 type Props = NativeStackScreenProps<AccountStackParamList, "ContactForm">;
 
 export function ContactFormScreen({ route, navigation }: Props) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const editingId = route.params?.id;
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -145,16 +147,17 @@ export function ContactFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md },
-  field: { gap: 6 },
-  label: { ...typography.caption, color: colors.text, fontWeight: "600" },
-  switchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: spacing.xs,
-  },
-  submit: { marginTop: spacing.sm },
-});
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.md },
+    field: { gap: 6 },
+    label: { ...typography.caption, color: colors.text, fontWeight: "600" },
+    switchRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: spacing.xs,
+    },
+    submit: { marginTop: spacing.sm },
+  });

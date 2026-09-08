@@ -10,6 +10,7 @@ export type AccountStackParamList = {
   ContactForm: { id?: number } | undefined;
   Orders: undefined;
   OrderDetail: { id_pedido: number };
+  Appearance: undefined;
 };
 
 export type TabsParamList = {

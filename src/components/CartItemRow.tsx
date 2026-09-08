@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatarMoeda, numeroSeguro } from "../lib/format";
 import { normalizarUrlImagem } from "../lib/produtos";
-import { colors, radius, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { CartItem } from "../types/cart";
 
 import { Checkbox } from "./Checkbox";
@@ -28,6 +28,8 @@ export function CartItemRow({
   onChangeQuantity,
   onRemove,
 }: CartItemRowProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const uri = normalizarUrlImagem(item.foto_produto ?? item.produto?.foto ?? "");
   const nome = item.produto?.nome ?? "Produto indisponível";
   const unit = numeroSeguro(item.preco_unitario, 0);
@@ -78,35 +80,36 @@ export function CartItemRow({
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-    alignItems: "flex-start",
-  },
-  imageWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  image: { width: "100%", height: "100%" },
-  info: { flex: 1, gap: 2 },
-  name: { ...typography.body, fontWeight: "600" },
-  variant: { ...typography.caption },
-  unit: { ...typography.caption, color: colors.textMuted },
-  controls: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: spacing.sm,
-  },
-  subtotal: { ...typography.price, fontSize: 15 },
-  remove: { padding: spacing.xs },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: "row",
+      gap: spacing.sm,
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+      alignItems: "flex-start",
+    },
+    imageWrap: {
+      width: 64,
+      height: 64,
+      borderRadius: radius.sm,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      overflow: "hidden",
+    },
+    image: { width: "100%", height: "100%" },
+    info: { flex: 1, gap: 2 },
+    name: { ...typography.body, fontWeight: "600" },
+    variant: { ...typography.caption },
+    unit: { ...typography.caption, color: colors.textMuted },
+    controls: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: spacing.sm,
+    },
+    subtotal: { ...typography.price, fontSize: 15 },
+    remove: { padding: spacing.xs },
+  });

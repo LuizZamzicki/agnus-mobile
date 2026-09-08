@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { FormBanner } from "../components/FormBanner";
 import { SegmentedTabs } from "../components/SegmentedTabs";
 import type { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { useThemedStyles, type Theme } from "../theme";
 
 import { LoginForm } from "./auth/LoginForm";
 import { SignupForm } from "./auth/SignupForm";
@@ -15,6 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 type Mode = "login" | "signup";
 
 export function LoginScreen({ navigation }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const [mode, setMode] = useState<Mode>("login");
   const [prefillEmail, setPrefillEmail] = useState<string | undefined>();
   const [justRegistered, setJustRegistered] = useState(false);
@@ -81,12 +82,13 @@ export function LoginScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: spacing.xxl },
-  title: { ...typography.title },
-  subtitle: { ...typography.caption, marginBottom: spacing.sm },
-  tabs: { marginBottom: spacing.md },
-  banner: { marginBottom: spacing.sm },
-});
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    content: { padding: spacing.lg, gap: spacing.sm, paddingBottom: spacing.xxl },
+    title: { ...typography.title },
+    subtitle: { ...typography.caption, marginBottom: spacing.sm },
+    tabs: { marginBottom: spacing.md },
+    banner: { marginBottom: spacing.sm },
+  });

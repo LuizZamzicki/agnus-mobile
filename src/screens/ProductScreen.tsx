@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useMemo, useState } from "react";
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { FlatList, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ApiError } from "../api/client";
@@ -12,9 +12,11 @@ import { EmptyState } from "../components/EmptyState";
 import { ErrorState } from "../components/ErrorState";
 import { Price } from "../components/Price";
 import { PhotoCarousel } from "../components/PhotoCarousel";
+import { ProductCard } from "../components/ProductCard";
 import { Rating } from "../components/Rating";
 import { SizePicker } from "../components/SizePicker";
-import { useCategories, useProductBundle } from "../hooks/products";
+import { useToast } from "../components/Toast";
+import { useCategories, useProductBundle, useRelatedProducts } from "../hooks/products";
 import {
   deduplicarUrls,
   mediaAvaliacoes,
@@ -23,17 +25,20 @@ import {
 } from "../lib/produtos";
 import { numeroSeguro } from "../lib/format";
 import type { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
-import type { ProductColor, ProductGrade, ProductReview } from "../types/product";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
+import type { CatalogProduct, ProductColor, ProductGrade, ProductReview } from "../types/product";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Product">;
 
 export function ProductScreen({ route, navigation }: Props) {
+  const styles = useThemedStyles(makeStyles);
   const { id } = route.params;
   const { isAuthenticated } = useAuth();
   const cart = useCart();
+  const toast = useToast();
   const { data, isPending, isError, error, refetch, isRefetching } = useProductBundle(id);
   const categories = useCategories();
+  const related = useRelatedProducts(id, data?.produto.id_categoria ?? null, !!data);
 
   const [color, setColor] = useState<ProductColor | undefined>();
   const [grade, setGrade] = useState<ProductGrade | undefined>();
@@ -44,6 +49,13 @@ export function ProductScreen({ route, navigation }: Props) {
     [data?.fotos],
   );
   const media = useMemo(() => mediaAvaliacoes(data?.avaliacoes ?? []), [data?.avaliacoes]);
+
+  // Ao abrir o produto, já vem com a primeira cor e o primeiro tamanho marcados.
+  useEffect(() => {
+    if (!data) return;
+    setColor((atual) => atual ?? data.cores[0]);
+    setGrade((atual) => atual ?? data.grades[0]);
+  }, [data]);
 
   if (isPending) {
     return (
@@ -69,6 +81,9 @@ export function ProductScreen({ route, navigation }: Props) {
   const hasVariation = cores.length > 0 || grades.length > 0;
   const preco = precoComVariacoes(produto.preco_base, color, grade);
 
+  const openRelated = (product: CatalogProduct) =>
+    navigation.push("Product", { id: product.id_produto });
+
   const onAddToCart = async () => {
     if (needsColor || needsGrade || !buyable || !color || !grade) return;
     if (!isAuthenticated) {
@@ -82,15 +97,17 @@ export function ProductScreen({ route, navigation }: Props) {
         id_produto_grade: grade.id_produto_grade,
         quantidade: 1,
       });
-      Alert.alert("Adicionado ao carrinho", produto.nome, [
-        { text: "Continuar comprando", style: "cancel" },
-        { text: "Ver carrinho", onPress: () => navigation.navigate("Tabs", { screen: "Cart" }) },
-      ]);
+      toast.show({
+        title: produto.nome,
+        message: "Adicionado ao carrinho",
+        actionLabel: "Ver carrinho",
+        onAction: () => navigation.navigate("Tabs", { screen: "Cart" }),
+      });
     } catch (err) {
-      Alert.alert(
-        "Ops",
-        err instanceof ApiError ? err.message : "Não foi possível adicionar ao carrinho.",
-      );
+      toast.show({
+        message: err instanceof ApiError ? err.message : "Não foi possível adicionar ao carrinho.",
+        tone: "error",
+      });
     } finally {
       setAdding(false);
     }
@@ -125,6 +142,25 @@ export function ProductScreen({ route, navigation }: Props) {
           ) : null}
 
           <ReviewsSection reviews={avaliacoes} average={media} />
+
+          {related.items.length > 0 ? (
+            <View style={styles.related}>
+              <Text style={styles.relatedTitle}>Você também pode gostar</Text>
+              <FlatList
+                data={related.items}
+                keyExtractor={(item) => String(item.id_produto)}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.relatedList}
+                contentContainerStyle={styles.relatedRail}
+                renderItem={({ item }) => (
+                  <View style={styles.relatedItem}>
+                    <ProductCard product={item} onPress={openRelated} />
+                  </View>
+                )}
+              />
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -150,6 +186,8 @@ export function ProductScreen({ route, navigation }: Props) {
 }
 
 function ReviewsSection({ reviews, average }: { reviews: ProductReview[]; average: number }) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   if (reviews.length === 0) {
     return (
       <View style={styles.reviews}>
@@ -176,31 +214,37 @@ function ReviewsSection({ reviews, average }: { reviews: ProductReview[]; averag
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: spacing.xxl },
-  body: { padding: spacing.lg, gap: spacing.md },
-  category: { ...typography.caption, textTransform: "uppercase", letterSpacing: 0.5 },
-  name: { ...typography.title },
-  price: { fontSize: 22 },
-  description: { ...typography.body, color: colors.textMuted, lineHeight: 21 },
-  reviews: { marginTop: spacing.sm, gap: spacing.sm },
-  reviewsHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  reviewEmpty: { ...typography.caption },
-  review: {
-    gap: 4,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-  reviewTitle: { ...typography.body, fontWeight: "600" },
-  reviewBody: { ...typography.body, color: colors.textMuted },
-  bar: {
-    padding: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.background,
-    gap: spacing.xs,
-  },
-  hint: { ...typography.caption, textAlign: "center", color: colors.danger },
-});
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { paddingBottom: spacing.xxl },
+    body: { padding: spacing.lg, gap: spacing.md },
+    category: { ...typography.caption, textTransform: "uppercase", letterSpacing: 0.5 },
+    name: { ...typography.title },
+    price: { fontSize: 22 },
+    description: { ...typography.body, color: colors.textMuted, lineHeight: 21 },
+    reviews: { marginTop: spacing.sm, gap: spacing.sm },
+    reviewsHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    reviewEmpty: { ...typography.caption },
+    review: {
+      gap: 4,
+      paddingTop: spacing.sm,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    reviewTitle: { ...typography.body, fontWeight: "600" },
+    reviewBody: { ...typography.body, color: colors.textMuted },
+    related: { marginTop: spacing.md, gap: spacing.sm },
+    relatedTitle: { ...typography.heading },
+    relatedList: { marginHorizontal: -spacing.lg },
+    relatedRail: { paddingHorizontal: spacing.lg, gap: spacing.md },
+    relatedItem: { width: 150 },
+    bar: {
+      padding: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+      gap: spacing.xs,
+    },
+    hint: { ...typography.caption, textAlign: "center", color: colors.danger },
+  });

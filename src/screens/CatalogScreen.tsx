@@ -11,13 +11,15 @@ import { ProductCard } from "../components/ProductCard";
 import { SearchBar } from "../components/SearchBar";
 import { useCatalog, useCategories } from "../hooks/products";
 import type { RootStackParamList, TabsParamList } from "../navigation/types";
-import { colors, spacing } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 import type { CatalogProduct } from "../types/product";
 
 type CatalogRoute = RouteProp<TabsParamList, "Catalog">;
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export function CatalogScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const navigation = useNavigation<Nav>();
   const route = useRoute<CatalogRoute>();
 
@@ -103,11 +105,17 @@ export function CatalogScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, gap: spacing.xs },
-  list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
-  column: { gap: spacing.md },
-  footer: { paddingVertical: spacing.lg },
-  end: { textAlign: "center", color: colors.textMuted, fontSize: 13, paddingVertical: spacing.lg },
-});
+const makeStyles = ({ colors, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, gap: spacing.xs },
+    list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
+    column: { gap: spacing.md },
+    footer: { paddingVertical: spacing.lg },
+    end: {
+      textAlign: "center",
+      color: colors.textMuted,
+      fontSize: 13,
+      paddingVertical: spacing.lg,
+    },
+  });

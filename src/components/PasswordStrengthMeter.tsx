@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { evaluatePasswordStrength, type StrengthLabel } from "../lib/passwordStrength";
-import { colors, radius, spacing } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 const LABELS: Record<StrengthLabel, string> = {
   muito_fraca: "Muito fraca",
@@ -13,18 +13,19 @@ const LABELS: Record<StrengthLabel, string> = {
   muito_forte: "Muito forte",
 };
 
-const BAR_COLOR: Record<StrengthLabel, string> = {
-  muito_fraca: colors.danger,
-  fraca: colors.danger,
-  media: colors.accent,
-  forte: colors.success,
-  muito_forte: colors.success,
-};
-
 export function PasswordStrengthMeter({ password }: { password: string }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   if (!password) return null;
   const result = evaluatePasswordStrength(password);
-  const color = BAR_COLOR[result.label];
+  const barColor: Record<StrengthLabel, string> = {
+    muito_fraca: colors.danger,
+    fraca: colors.danger,
+    media: colors.accent,
+    forte: colors.success,
+    muito_forte: colors.success,
+  };
+  const color = barColor[result.label];
 
   return (
     <View style={styles.wrap}>
@@ -52,18 +53,19 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: spacing.xs, marginTop: spacing.xs },
-  track: {
-    height: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
-    overflow: "hidden",
-  },
-  fill: { height: "100%", borderRadius: radius.pill },
-  label: { fontSize: 12, fontWeight: "600" },
-  checks: { gap: 2, marginTop: 2 },
-  checkRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  checkText: { fontSize: 12, color: colors.textMuted },
-  checkTextDone: { color: colors.text },
-});
+const makeStyles = ({ colors, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    wrap: { gap: spacing.xs, marginTop: spacing.xs },
+    track: {
+      height: 6,
+      borderRadius: radius.pill,
+      backgroundColor: colors.surfaceAlt,
+      overflow: "hidden",
+    },
+    fill: { height: "100%", borderRadius: radius.pill },
+    label: { fontSize: 12, fontWeight: "600" },
+    checks: { gap: 2, marginTop: 2 },
+    checkRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    checkText: { fontSize: 12, color: colors.textMuted },
+    checkTextDone: { color: colors.text },
+  });

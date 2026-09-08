@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { ApiError } from "../api/client";
-import { colors, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 import { Button } from "./Button";
 
@@ -24,6 +24,8 @@ function messageFor(error: unknown): string {
 }
 
 export function ErrorState({ error, onRetry, title = "Não deu para carregar" }: ErrorStateProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.container}>
       <Ionicons name="cloud-offline-outline" size={40} color={colors.textMuted} />
@@ -40,15 +42,16 @@ export function ErrorState({ error, onRetry, title = "Não deu para carregar" }:
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.xl,
-    gap: spacing.sm,
-  },
-  title: { ...typography.heading, textAlign: "center" },
-  message: { ...typography.caption, textAlign: "center" },
-  action: { marginTop: spacing.md },
-});
+const makeStyles = ({ typography, spacing }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.xl,
+      gap: spacing.sm,
+    },
+    title: { ...typography.heading, textAlign: "center" },
+    message: { ...typography.caption, textAlign: "center" },
+    action: { marginTop: spacing.md },
+  });

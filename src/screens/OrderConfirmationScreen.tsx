@@ -6,11 +6,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../components/Button";
 import type { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "OrderConfirmation">;
 
 export function OrderConfirmationScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id_pedido } = route.params;
 
   return (
@@ -43,25 +45,26 @@ export function OrderConfirmationScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.xl,
-    gap: spacing.md,
-  },
-  badge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.success,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: { ...typography.title, textAlign: "center" },
-  message: { ...typography.body, color: colors.textMuted, textAlign: "center", lineHeight: 21 },
-  status: { color: colors.text, fontWeight: "600" },
-  footer: { padding: spacing.lg, gap: spacing.sm },
-});
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.xl,
+      gap: spacing.md,
+    },
+    badge: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: colors.success,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: { ...typography.title, textAlign: "center" },
+    message: { ...typography.body, color: colors.textMuted, textAlign: "center", lineHeight: 21 },
+    status: { color: colors.text, fontWeight: "600" },
+    footer: { padding: spacing.lg, gap: spacing.sm },
+  });

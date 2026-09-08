@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 interface RatingProps {
   /** Média de 0 a 5. */
@@ -14,6 +14,8 @@ interface RatingProps {
 }
 
 export function Rating({ value, count, size = 16, showValue = true }: RatingProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const rounded = Math.round(value * 2) / 2;
 
   return (
@@ -33,7 +35,8 @@ export function Rating({ value, count, size = 16, showValue = true }: RatingProp
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 2 },
-  text: { marginLeft: 4, fontSize: 13, color: colors.textMuted },
-});
+const makeStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    row: { flexDirection: "row", alignItems: "center", gap: 2 },
+    text: { marginLeft: 4, fontSize: 13, color: colors.textMuted },
+  });

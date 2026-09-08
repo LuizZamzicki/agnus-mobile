@@ -1,6 +1,6 @@
 import type { AddToCartInput, Cart, CartItem } from "../types/cart";
 
-import { request } from "./client";
+import { ApiError, request } from "./client";
 
 /** `GET /carts?id_usuario=` — o back não tem endpoint "meu carrinho". */
 export async function getCartByUser(userId: number): Promise<Cart | null> {
@@ -35,6 +35,12 @@ export function updateCartItemQuantity(itemId: number, quantidade: number): Prom
   });
 }
 
-export function removeCartItem(itemId: number): Promise<void> {
-  return request<void>(`/cart-items/${itemId}`, { method: "DELETE" });
+/** Remove o item. Um 404 é tratado como sucesso — o item já não está no carrinho. */
+export async function removeCartItem(itemId: number): Promise<void> {
+  try {
+    await request<void>(`/cart-items/${itemId}`, { method: "DELETE" });
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return;
+    throw err;
+  }
 }

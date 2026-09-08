@@ -133,6 +133,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [invalidateItems],
   );
 
+  const { refetch: refetchCart } = cartQuery;
+  const { refetch: refetchItems } = itemsQuery;
+  const refetch = useCallback(() => {
+    refetchCart();
+    refetchItems();
+  }, [refetchCart, refetchItems]);
+
   const value = useMemo<CartContextValue>(
     () => ({
       cartId,
@@ -141,10 +148,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       isLoading: cartQuery.isPending || (cartId != null && itemsQuery.isPending),
       isError: cartQuery.isError || itemsQuery.isError,
       isMutating: addMutation.isPending || quantityMutation.isPending || removeMutation.isPending,
-      refetch: () => {
-        cartQuery.refetch();
-        itemsQuery.refetch();
-      },
+      refetch,
       addItem,
       setQuantity,
       removeItem,
@@ -158,6 +162,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addMutation.isPending,
       quantityMutation.isPending,
       removeMutation.isPending,
+      refetch,
       addItem,
       setQuantity,
       removeItem,

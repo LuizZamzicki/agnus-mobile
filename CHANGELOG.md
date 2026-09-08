@@ -58,11 +58,19 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ### Infra
 
-- **Expo SDK 57 → 54** (`react-native` 0.86 → 0.81, `react` 19.2 → 19.1). O
-  `create-expo-app` gerou o projeto na SDK 57; o Expo Go usado para testar está na
-  SDK 54. Todas as dependências gerenciadas (`expo-*`, libs nativas, `netinfo`,
-  `eslint-config-expo` `~10`, `typescript` `~5.9`) foram fixadas nas versões da
-  SDK 54 (`expo install --check` diz "up to date"). Sem mudança de código de app.
+- **Expo SDK 54 → 57** (`react-native` 0.81 → 0.86, `react` 19.1 → 19.2,
+  `typescript` `~5.9` → `~6.0`, `eslint-config-expo` `~10` → `~57`, `netinfo` 11 →
+  12). O Expo Go da App Store só instala a SDK mais recente e o projeto tinha sido
+  fixado na 54 pra rodar no Expo Go da época — quando o Expo Go do aparelho
+  atualizou pra 57, a 54 deixou de abrir. `expo install --fix` alinhou as libs
+  gerenciadas; `expo-doctor` sem apontamentos. `app.config.ts` ganhou os plugins
+  `expo-image` e `expo-status-bar` (agora obrigatórios). Ajustes de código pela
+  regra `react-hooks` mais rígida do `eslint-config-expo` 57: `Animated.Value` do
+  toast via `useState` em vez de `useRef().current`; a pré-seleção de cor/tamanho
+  na tela de produto passou a ser derivada no render em vez de `setState` num
+  efeito.
+- Antes disso o projeto tinha sido **fixado na SDK 54** (gerado pelo
+  `create-expo-app` na 57) pra rodar no Expo Go.
 
 ### Polimento
 

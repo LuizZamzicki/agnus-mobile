@@ -5,6 +5,57 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Checkout
+
+- Corrige "Não foi possível concluir o pedido: Item do carrinho nao encontrado":
+  a limpeza do carrinho depois de criar o pedido virou **best-effort** — se um
+  item do carrinho já não existe no back, o pedido não é mais reprovado (evita
+  também pedido duplicado num retry). `removeCartItem` trata `404` como sucesso.
+- Checkout revalida o carrinho ao abrir (`refetch`), pra não finalizar sobre
+  itens defasados do cache offline. `useCart().refetch` agora tem identidade
+  estável.
+
+### Produto
+
+- A tela de produto abre com a **primeira cor e o primeiro tamanho já
+  selecionados** (só marca o que ainda não foi escolhido, então pull-to-refresh
+  não desfaz a seleção do usuário).
+- **Carrossel "Você também pode gostar"** no fim da tela: produtos da mesma
+  categoria (ou mais vendidos, quando o produto não tem categoria), sem o produto
+  atual, no máximo 10. Hook `useRelatedProducts`; tocar num card empilha uma nova
+  tela de produto (`navigation.push`).
+- Adicionar ao carrinho não usa mais `Alert.alert`: agora um **toast** animado
+  (entra com mola, ícone, nome do produto em destaque, chip de ação "Ver carrinho"
+  e barra de progresso que esvazia até sumir). Toca pra fechar. Componente
+  reutilizável `ToastProvider` / `useToast()` (`src/components/Toast.tsx`),
+  temático, com variante de erro.
+
+### Tema claro/escuro
+
+- **Modo claro/escuro dinâmico**: por padrão segue o tema do sistema
+  (`userInterfaceStyle: "automatic"` + `useColorScheme`), com opção de fixar em
+  **Sistema / Claro / Escuro** na Conta → **Aparência** (`AppearanceScreen`). A
+  preferência é salva no `AsyncStorage` (`agnus.theme-preference`).
+- Infra em `src/theme`: `ThemeProvider`, `useTheme()` (tema resolvido para JSX),
+  `useThemePreference()` e `useThemedStyles(makeStyles)` para folhas de estilo que
+  reagem ao tema; `useNavigationTheme()` para o React Navigation. Paletas
+  `lightColors` / `darkColors` e `typography` derivada das cores.
+- Todos os componentes/telas migrados de `import { colors }` estático para
+  `const styles = useThemedStyles(makeStyles)` + `makeStyles = ({ colors }: Theme) => StyleSheet.create(...)`.
+
+### Endereços — formulário
+
+- **Primeiro endereço entra como principal**: quando o usuário ainda não tem
+  endereços, o toggle "principal" já vem ligado e travado.
+- **UF vira combobox** (`Select`): lista dos 27 estados num modal, sem digitação
+  livre.
+- **Cidade com autocomplete** (`Autocomplete` + IBGE): ao digitar aparece uma
+  lista de até 5 municípios válidos da UF selecionada (acima do campo); tocar
+  seleciona e completa; digitar o nome completo correto seleciona sozinho; cidade
+  fora da lista é recusada no envio. Municípios vêm da API pública do IBGE
+  (`localidades/estados/{UF}/municipios`), cacheados pelo React Query. Sem lista
+  carregada (offline), o campo aceita o texto como está.
+
 ### Infra
 
 - **Expo SDK 57 → 54** (`react-native` 0.86 → 0.81, `react` 19.2 → 19.1). O

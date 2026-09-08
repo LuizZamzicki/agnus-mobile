@@ -26,8 +26,8 @@ const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<ToastOptions | null>(null);
   const [mounted, setMounted] = useState(false);
-  const anim = useRef(new Animated.Value(0)).current;
-  const progress = useRef(new Animated.Value(1)).current;
+  const [anim] = useState(() => new Animated.Value(0));
+  const [progress] = useState(() => new Animated.Value(1));
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();

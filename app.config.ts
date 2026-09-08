@@ -32,6 +32,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-secure-store",
     "expo-font",
+    "expo-image",
+    "expo-status-bar",
     [
       "expo-splash-screen",
       {

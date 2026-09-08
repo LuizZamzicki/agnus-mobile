@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -40,22 +40,19 @@ export function ProductScreen({ route, navigation }: Props) {
   const categories = useCategories();
   const related = useRelatedProducts(id, data?.produto.id_categoria ?? null, !!data);
 
-  const [color, setColor] = useState<ProductColor | undefined>();
-  const [grade, setGrade] = useState<ProductGrade | undefined>();
+  const [colorChoice, setColor] = useState<ProductColor | undefined>();
+  const [gradeChoice, setGrade] = useState<ProductGrade | undefined>();
   const [adding, setAdding] = useState(false);
+
+  // Sem escolha do usuário, abre já na primeira cor e no primeiro tamanho.
+  const color = colorChoice ?? data?.cores[0];
+  const grade = gradeChoice ?? data?.grades[0];
 
   const photos = useMemo(
     () => deduplicarUrls((data?.fotos ?? []).map((f) => normalizarUrlImagem(f.caminho_url))),
     [data?.fotos],
   );
   const media = useMemo(() => mediaAvaliacoes(data?.avaliacoes ?? []), [data?.avaliacoes]);
-
-  // Ao abrir o produto, já vem com a primeira cor e o primeiro tamanho marcados.
-  useEffect(() => {
-    if (!data) return;
-    setColor((atual) => atual ?? data.cores[0]);
-    setGrade((atual) => atual ?? data.grades[0]);
-  }, [data]);
 
   if (isPending) {
     return (

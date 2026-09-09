@@ -4,7 +4,6 @@ import {
   statusCodes,
 } from "@react-native-google-signin/google-signin";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Platform } from "react-native";
 
 import { updateProfile as updateProfileApi } from "../api/account";
 import * as authApi from "../api/auth";
@@ -16,10 +15,7 @@ import { isAdmin, type LoginInput, type RegisterInput, type User } from "../type
 import { AdminNotAllowedError, GoogleSignInCancelledError } from "./errors";
 import { clearToken, loadToken, saveToken } from "./tokenStore";
 
-// iOS só entra quando também há um client iOS configurado (o login nativo do
-// Google no iOS exige o próprio client + URL scheme). Sem ele, o botão some no
-// iOS e o app segue no Expo Go.
-const googleEnabled = !!GOOGLE_WEB_CLIENT_ID && (Platform.OS !== "ios" || !!GOOGLE_IOS_CLIENT_ID);
+const googleEnabled = !!GOOGLE_WEB_CLIENT_ID;
 
 if (googleEnabled) {
   GoogleSignin.configure({

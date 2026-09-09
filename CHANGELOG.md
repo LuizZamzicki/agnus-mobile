@@ -15,7 +15,10 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   Contas `administrador` continuam barradas (`AdminNotAllowedError`).
 - Client IDs vêm de `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` /
   `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` / `EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME` (via
-  `app.config.ts` → `extra`). Sem eles o botão não aparece.
+  `app.config.ts` → `extra`). O `WEB_CLIENT_ID` é o mesmo `GOOGLE_CLIENT_ID` do
+  back. Sem o `WEB_CLIENT_ID` o botão não aparece; no **iOS** ele também só
+  aparece se houver `IOS_CLIENT_ID` (login nativo do Google no iOS exige client
+  próprio), então dá pra habilitar só no Android.
 - **Passa a exigir dev build** quando habilitado (módulo nativo) — sem as
   variáveis o app continua 100% Expo Go. Setup do Google Cloud no `README.md`.
 

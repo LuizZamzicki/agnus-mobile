@@ -5,7 +5,7 @@ import { TextInput, View } from "react-native";
 import { z } from "zod";
 
 import { useAuth } from "../../auth/AuthContext";
-import { AdminNotAllowedError } from "../../auth/errors";
+import { AdminNotAllowedError, GoogleSignInCancelledError } from "../../auth/errors";
 import { ApiError } from "../../api/client";
 import { Button } from "../../components/Button";
 import { FormBanner } from "../../components/FormBanner";
@@ -27,8 +27,9 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ initialEmail, onSuccess }: LoginFormProps) {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle, googleEnabled } = useAuth();
   const [banner, setBanner] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const senhaRef = useRef<TextInput>(null);
 
   const {
@@ -49,6 +50,22 @@ export function LoginForm({ initialEmail, onSuccess }: LoginFormProps) {
       if (err instanceof AdminNotAllowedError) setBanner(err.message);
       else if (err instanceof ApiError) setBanner(err.message);
       else setBanner("Não foi possível entrar. Tente novamente.");
+    }
+  };
+
+  const onGoogle = async () => {
+    setBanner(null);
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      onSuccess();
+    } catch (err) {
+      if (err instanceof GoogleSignInCancelledError) return; // usuário desistiu
+      if (err instanceof AdminNotAllowedError) setBanner(err.message);
+      else if (err instanceof ApiError) setBanner(err.message);
+      else setBanner("Não foi possível entrar com o Google. Tente novamente.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -99,6 +116,16 @@ export function LoginForm({ initialEmail, onSuccess }: LoginFormProps) {
         loading={isSubmitting}
         style={styles.submit}
       />
+
+      {googleEnabled ? (
+        <Button
+          title="Continuar com Google"
+          variant="secondary"
+          onPress={onGoogle}
+          loading={googleLoading}
+          disabled={isSubmitting}
+        />
+      ) : null}
     </View>
   );
 }

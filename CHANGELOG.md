@@ -5,6 +5,23 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Login com Google
+
+- Botão **"Continuar com Google"** na tela de login. Fluxo **web via navegador**
+  (`expo-auth-session` + `expo-web-browser`): o app abre
+  `GET {API}/auth/google?redirect=<url-do-app>`, o backend faz o OAuth e no
+  callback redireciona pra `<url-do-app>?token=…`; o app lê o token e hidrata com
+  `/auth/me`. **Roda no Expo Go** (iOS e Android) — sem módulo nativo, sem dev
+  build, sem conta Apple. `AuthContext` ganha `signInWithGoogle()` e
+  `googleEnabled`; contas `administrador` continuam barradas.
+- `EXPO_PUBLIC_GOOGLE_LOGIN=false` esconde o botão (quando o backend não tem o
+  Google OAuth no ambiente).
+- **No `agnus-back`**: `GET /auth/google` passou a aceitar `?redirect=` (embutido
+  no `state` assinado) e, no callback, redirecionar pra essa URL com `?token=` em
+  vez do `FRONTEND_URL` — só pra esquemas de um allowlist (`exp://`, `exp+`,
+  `agnusapp://`, `http://localhost`, `http://127.0.0.1`), pra não virar open
+  redirect com o token. Fluxo web (sem `redirect`) segue igual.
+
 ### Checkout
 
 - Corrige "Não foi possível concluir o pedido: Item do carrinho nao encontrado":

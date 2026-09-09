@@ -1,20 +1,37 @@
+import { makeRedirectUri } from "expo-auth-session";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { updateProfile as updateProfileApi } from "../api/account";
 import * as authApi from "../api/auth";
 import { ApiError } from "../api/client";
+import { API_URL, GOOGLE_LOGIN_ENABLED } from "../lib/env";
 import type { ProfileInput } from "../types/account";
 import { isAdmin, type LoginInput, type RegisterInput, type User } from "../types/user";
 
-import { AdminNotAllowedError } from "./errors";
+import { AdminNotAllowedError, GoogleSignInCancelledError } from "./errors";
 import { clearToken, loadToken, saveToken } from "./tokenStore";
+
+// Fecha a aba de auth se o app reabrir no meio do fluxo (necessário no web,
+// inócuo no nativo).
+WebBrowser.maybeCompleteAuthSession();
+
+function firstParam(value: string | string[] | undefined): string | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return typeof value === "string" ? value : null;
+}
 
 interface AuthContextValue {
   user: User | null;
   /** true enquanto reidrata a sessão no boot. */
   initializing: boolean;
   isAuthenticated: boolean;
+  /** true quando o botão "Continuar com Google" deve aparecer. */
+  googleEnabled: boolean;
   signIn: (input: LoginInput) => Promise<User>;
+  /** Login com Google via navegador (fluxo web do backend). */
+  signInWithGoogle: () => Promise<User>;
   signUp: (input: RegisterInput) => Promise<void>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -80,6 +97,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return loggedUser;
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    const redirectUri = makeRedirectUri({ scheme: "agnusapp", path: "auth" });
+    const authUrl = `${API_URL}/auth/google?redirect=${encodeURIComponent(redirectUri)}`;
+
+    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+    if (result.type !== "success") throw new GoogleSignInCancelledError();
+
+    const { queryParams } = Linking.parse(result.url);
+    const returnedError = firstParam(queryParams?.error);
+    if (returnedError) throw new ApiError(400, returnedError);
+
+    const token = firstParam(queryParams?.token);
+    if (!token) throw new GoogleSignInCancelledError();
+
+    await saveToken(token);
+    try {
+      const me = await authApi.me();
+      if (isAdmin(me)) {
+        await clearToken();
+        throw new AdminNotAllowedError();
+      }
+      setUser(me);
+      return me;
+    } catch (err) {
+      if (!(err instanceof AdminNotAllowedError)) await clearToken();
+      throw err;
+    }
+  }, []);
+
   const signUp = useCallback(async (input: RegisterInput) => {
     await authApi.register(input);
   }, []);
@@ -98,13 +144,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       initializing,
       isAuthenticated: !!user,
+      googleEnabled: GOOGLE_LOGIN_ENABLED,
       signIn,
+      signInWithGoogle,
       signUp,
       signOut,
       refresh,
       updateProfile,
     }),
-    [user, initializing, signIn, signUp, signOut, refresh, updateProfile],
+    [user, initializing, signIn, signInWithGoogle, signUp, signOut, refresh, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -34,6 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-font",
     "expo-image",
     "expo-status-bar",
+    "expo-web-browser",
     [
       "expo-splash-screen",
       {
@@ -46,5 +47,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ],
   extra: {
     apiUrl: API_URL,
+    // Botão "Continuar com Google" na tela de login. Desligue com
+    // EXPO_PUBLIC_GOOGLE_LOGIN=false se o backend não tiver o Google OAuth
+    // configurado no ambiente. O fluxo é web (expo-auth-session), roda no Expo Go.
+    googleLogin: process.env.EXPO_PUBLIC_GOOGLE_LOGIN !== "false",
   },
 });

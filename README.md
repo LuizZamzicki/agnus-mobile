@@ -58,6 +58,29 @@ npx expo start
 
 Tudo roda no **Expo Go** — nenhuma dependência exige dev build.
 
+## Login com Google
+
+Opcional (ligado por padrão; `EXPO_PUBLIC_GOOGLE_LOGIN=false` esconde o botão).
+Fluxo **web via navegador** (`expo-auth-session` + `expo-web-browser`), então
+**funciona no Expo Go** no iOS e no Android — sem client OAuth no app, sem dev
+build, sem conta Apple.
+
+Como funciona: o app abre `GET {API}/auth/google?redirect=<url-do-app>` no
+navegador; o backend faz o OAuth com o Google (usando o client Web dele) e, no
+callback, redireciona pra `<url-do-app>?token=…`. O app lê o `token` e hidrata a
+sessão com `/auth/me`.
+
+Requisitos no **`agnus-back`** (o app não precisa de nada além da API):
+
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` /
+  `GOOGLE_OAUTH_SCOPES` / `GOOGLE_STATE_SECRET` configurados (já usados no login
+  web).
+- O `GET /auth/google` aceita `?redirect=` e só repassa esquemas do allowlist
+  (`exp://`, `exp+`, `agnusapp://`, `http://localhost`, `http://127.0.0.1`) — o
+  resto cai no `FRONTEND_URL` normal.
+- No Google Cloud Console, o **redirect URI autorizado** do client Web continua
+  sendo só o `GOOGLE_REDIRECT_URI` do backend; o Google nunca vê o `exp://`.
+
 ## Build de teste (EAS)
 
 `eas.json` traz os perfis `development`, `preview` e `production`. Para um APK

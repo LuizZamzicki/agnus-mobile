@@ -1,20 +1,39 @@
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { updateProfile as updateProfileApi } from "../api/account";
 import * as authApi from "../api/auth";
 import { ApiError } from "../api/client";
+import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "../lib/env";
 import type { ProfileInput } from "../types/account";
 import { isAdmin, type LoginInput, type RegisterInput, type User } from "../types/user";
 
-import { AdminNotAllowedError } from "./errors";
+import { AdminNotAllowedError, GoogleSignInCancelledError } from "./errors";
 import { clearToken, loadToken, saveToken } from "./tokenStore";
+
+const googleEnabled = !!GOOGLE_WEB_CLIENT_ID;
+
+if (googleEnabled) {
+  GoogleSignin.configure({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+  });
+}
 
 interface AuthContextValue {
   user: User | null;
   /** true enquanto reidrata a sessão no boot. */
   initializing: boolean;
   isAuthenticated: boolean;
+  /** true quando o build tem os client IDs do Google configurados. */
+  googleEnabled: boolean;
   signIn: (input: LoginInput) => Promise<User>;
+  /** Login nativo com Google -> troca o id_token por sessão no backend. */
+  signInWithGoogle: () => Promise<User>;
   signUp: (input: RegisterInput) => Promise<void>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -29,6 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initializing, setInitializing] = useState(true);
 
   const signOut = useCallback(async () => {
+    if (googleEnabled) {
+      await GoogleSignin.signOut().catch(() => {});
+    }
     await clearToken();
     setUser(null);
   }, []);
@@ -80,6 +102,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return loggedUser;
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    if (!googleEnabled) {
+      throw new Error("Login com Google não está disponível neste build.");
+    }
+
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+    let idToken: string | null | undefined;
+    try {
+      const result = await GoogleSignin.signIn();
+      idToken = "data" in result ? result.data?.idToken : null;
+    } catch (err) {
+      if (isErrorWithCode(err) && err.code === statusCodes.SIGN_IN_CANCELLED) {
+        throw new GoogleSignInCancelledError();
+      }
+      throw err;
+    }
+
+    if (!idToken) throw new GoogleSignInCancelledError();
+
+    const { user: loggedUser, token } = await authApi.loginWithGoogle(idToken);
+    if (isAdmin(loggedUser)) {
+      await GoogleSignin.signOut().catch(() => {});
+      await clearToken();
+      throw new AdminNotAllowedError();
+    }
+    await saveToken(token);
+    setUser(loggedUser);
+    return loggedUser;
+  }, []);
+
   const signUp = useCallback(async (input: RegisterInput) => {
     await authApi.register(input);
   }, []);
@@ -98,13 +151,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       initializing,
       isAuthenticated: !!user,
+      googleEnabled,
       signIn,
+      signInWithGoogle,
       signUp,
       signOut,
       refresh,
       updateProfile,
     }),
-    [user, initializing, signIn, signUp, signOut, refresh, updateProfile],
+    [user, initializing, signIn, signInWithGoogle, signUp, signOut, refresh, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

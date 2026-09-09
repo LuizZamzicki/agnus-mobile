@@ -2,6 +2,11 @@ import type { ExpoConfig, ConfigContext } from "expo/config";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:3000";
 
+// Reversed client ID do OAuth client iOS do Google. Necessário só pra build iOS;
+// troque pelo valor real (Google Cloud Console → credencial iOS → "iOS URL scheme").
+const GOOGLE_IOS_URL_SCHEME =
+  process.env.EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME ?? "com.googleusercontent.apps.PLACEHOLDER";
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Agnus",
@@ -43,8 +48,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         backgroundColor: "#ffffff",
       },
     ],
+    ["@react-native-google-signin/google-signin", { iosUrlScheme: GOOGLE_IOS_URL_SCHEME }],
   ],
   extra: {
     apiUrl: API_URL,
+    googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   },
 });

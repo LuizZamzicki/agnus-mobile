@@ -8,11 +8,3 @@ export class AdminNotAllowedError extends Error {
     this.name = "AdminNotAllowedError";
   }
 }
-
-/** Lançado quando o usuário fecha o fluxo do Google sem concluir o login. */
-export class GoogleSignInCancelledError extends Error {
-  constructor() {
-    super("Login com Google cancelado.");
-    this.name = "GoogleSignInCancelledError";
-  }
-}

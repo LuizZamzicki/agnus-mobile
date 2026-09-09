@@ -5,20 +5,6 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
-### Login com Google
-
-- Botão **"Continuar com Google"** na tela de login
-  (`@react-native-google-signin/google-signin`): pega um `id_token` nativo do
-  Google e o backend (`POST /auth/google/token`, novo no `agnus-back`) troca por
-  sessão JWT, criando ou vinculando o usuário pelo e-mail. `AuthContext` ganha
-  `signInWithGoogle()` e `googleEnabled`; `signOut()` também desloga do Google.
-  Contas `administrador` continuam barradas (`AdminNotAllowedError`).
-- Client IDs vêm de `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` /
-  `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` / `EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME` (via
-  `app.config.ts` → `extra`). Sem eles o botão não aparece.
-- **Passa a exigir dev build** quando habilitado (módulo nativo) — sem as
-  variáveis o app continua 100% Expo Go. Setup do Google Cloud no `README.md`.
-
 ### Checkout
 
 - Corrige "Não foi possível concluir o pedido: Item do carrinho nao encontrado":

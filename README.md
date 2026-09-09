@@ -56,29 +56,7 @@ npx expo start
 - `a` abre no Android, `i` no iOS, `w` no navegador.
 - Ou escaneie o QR code com o Expo Go (device físico → use o IP da máquina na URL).
 
-O app roda no **Expo Go**, **exceto** com o login do Google habilitado
-(`@react-native-google-signin/google-signin` tem código nativo) — aí precisa de um
-dev build (`eas build --profile development`). Sem as variáveis
-`EXPO_PUBLIC_GOOGLE_*` o botão nem aparece e o Expo Go continua servindo.
-
-## Login com Google
-
-Opcional. Fluxo: o app pega um `id_token` nativo do Google e o backend
-(`POST /auth/google/token`) troca por sessão (JWT), criando/vinculando o usuário
-pelo e-mail. Some com as variáveis abaixo em branco.
-
-1. **Google Cloud Console** → _APIs & Services → Credentials_:
-   - **OAuth client (Web)** — o `client_id` dele vai em `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
-     (é o que assina o `id_token`). Adicione-o também em `GOOGLE_MOBILE_CLIENT_IDS`
-     no `.env` do `agnus-back`.
-   - **OAuth client (Android)** — package `com.agnus.mobile` + a SHA-1 do keystore
-     do dev build (`eas credentials` mostra). Sem `client_id` no app; só precisa existir.
-   - **OAuth client (iOS)** — bundle `com.agnus.mobile`. Copie o _client ID_ para
-     `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` e o _iOS URL scheme_ (reversed client ID)
-     para `EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME`.
-2. Preencha o `.env` (ver `.env.example`) e o `.env` do `agnus-back`
-   (`GOOGLE_MOBILE_CLIENT_IDS=<web+ios client ids, separados por vírgula>`).
-3. `eas build --profile development` e rode nesse dev build.
+Tudo roda no **Expo Go** — nenhuma dependência exige dev build.
 
 ## Build de teste (EAS)
 

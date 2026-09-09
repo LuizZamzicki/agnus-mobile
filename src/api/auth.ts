@@ -26,15 +26,6 @@ export function register(input: RegisterInput): Promise<unknown> {
   });
 }
 
-/** `POST /auth/google/token` -> `{ user, token }` (401 `{ message }` em erro). */
-export function loginWithGoogle(idToken: string): Promise<AuthResult> {
-  return request<AuthResult>("/auth/google/token", {
-    method: "POST",
-    body: { id_token: idToken },
-    skipAuth: true,
-  });
-}
-
 /** `GET /auth/me` (Bearer) -> `{ user }`. */
 export async function me(): Promise<User> {
   const data = await request<{ user: User }>("/auth/me");

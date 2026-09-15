@@ -5,6 +5,14 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Infra
+
+- **Expo SDK 57 → 54** (`react-native` 0.86 → 0.81, `react` 19.2 → 19.1). O
+  `create-expo-app` gerou o projeto na SDK 57; o Expo Go usado para testar está na
+  SDK 54. Todas as dependências gerenciadas (`expo-*`, libs nativas, `netinfo`,
+  `eslint-config-expo` `~10`, `typescript` `~5.9`) foram fixadas nas versões da
+  SDK 54 (`expo install --check` diz "up to date"). Sem mudança de código de app.
+
 ### Polimento
 
 - **Offline básico**: cache do React Query persistido no `AsyncStorage` (24h) via

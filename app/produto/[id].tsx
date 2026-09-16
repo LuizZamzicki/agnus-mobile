@@ -1,0 +1,252 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useMemo, useState } from "react";
+import { FlatList, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Button } from "../../src/components/Button";
+import { ColorPicker } from "../../src/components/produtos/ColorPicker";
+import { EmptyState } from "../../src/components/EmptyState";
+import { ErrorState } from "../../src/components/ErrorState";
+import { Price } from "../../src/components/Price";
+import { PhotoCarousel } from "../../src/components/produtos/PhotoCarousel";
+import { ProductCard } from "../../src/components/produtos/ProductCard";
+import { Rating } from "../../src/components/Rating";
+import { SizePicker } from "../../src/components/produtos/SizePicker";
+import { useToast } from "../../src/components/layout/Toast";
+import { useAuth } from "../../src/contexts/AuthContext";
+import { useCart } from "../../src/contexts/CartContext";
+import { useCategories } from "../../src/hooks/categorias";
+import { useProductBundle, useRelatedProducts } from "../../src/hooks/produtos";
+import { ApiError } from "../../src/lib/api";
+import { numeroSeguro } from "../../src/lib/format";
+import {
+  deduplicarUrls,
+  mediaAvaliacoes,
+  normalizarUrlImagem,
+  precoComVariacoes,
+} from "../../src/lib/produtos";
+import { useTheme, useThemedStyles, type Theme } from "../../src/theme";
+import type {
+  CatalogProduct,
+  ProductColor,
+  ProductGrade,
+  ProductReview,
+} from "../../src/types/product";
+
+export default function ProductScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const router = useRouter();
+  const { id: idParam } = useLocalSearchParams<{ id: string }>();
+  const id = Number(idParam);
+  const { isAuthenticated } = useAuth();
+  const cart = useCart();
+  const toast = useToast();
+  const { data, isPending, isError, error, refetch, isRefetching } = useProductBundle(id);
+  const categories = useCategories();
+  const related = useRelatedProducts(id, data?.produto.id_categoria ?? null, !!data);
+
+  const [colorChoice, setColor] = useState<ProductColor | undefined>();
+  const [gradeChoice, setGrade] = useState<ProductGrade | undefined>();
+  const [adding, setAdding] = useState(false);
+
+  // Sem escolha do usuário, abre já na primeira cor e no primeiro tamanho.
+  const color = colorChoice ?? data?.cores[0];
+  const grade = gradeChoice ?? data?.grades[0];
+
+  const photos = useMemo(
+    () => deduplicarUrls((data?.fotos ?? []).map((f) => normalizarUrlImagem(f.caminho_url))),
+    [data?.fotos],
+  );
+  const media = useMemo(() => mediaAvaliacoes(data?.avaliacoes ?? []), [data?.avaliacoes]);
+
+  if (isPending) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <EmptyState title="Carregando produto" loading />
+      </SafeAreaView>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ErrorState error={error} onRetry={() => refetch()} />
+      </SafeAreaView>
+    );
+  }
+
+  const { produto, cores, grades, avaliacoes } = data;
+  const categoriaNome = categories.data?.find((c) => c.id_categoria === produto.id_categoria)?.nome;
+  const buyable = cores.length > 0 && grades.length > 0;
+  const needsColor = cores.length > 0 && !color;
+  const needsGrade = grades.length > 0 && !grade;
+  const hasVariation = cores.length > 0 || grades.length > 0;
+  const preco = precoComVariacoes(produto.preco_base, color, grade);
+
+  const openRelated = (product: CatalogProduct) =>
+    router.push({ pathname: "/produto/[id]", params: { id: String(product.id_produto) } });
+
+  const onAddToCart = async () => {
+    if (needsColor || needsGrade || !buyable || !color || !grade) return;
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+    setAdding(true);
+    try {
+      await cart.addItem({
+        id_produto_cor: color.id_produto_cor,
+        id_produto_grade: grade.id_produto_grade,
+        quantidade: 1,
+      });
+      toast.show({
+        title: produto.nome,
+        message: "Adicionado ao carrinho",
+        actionLabel: "Ver carrinho",
+        onAction: () => router.push("/carrinho"),
+      });
+    } catch (err) {
+      toast.show({
+        message: err instanceof ApiError ? err.message : "Não foi possível adicionar ao carrinho.",
+        tone: "error",
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}
+      >
+        <PhotoCarousel photos={photos} />
+
+        <View style={styles.body}>
+          {categoriaNome ? <Text style={styles.category}>{categoriaNome}</Text> : null}
+          <Text style={styles.name} accessibilityRole="header">
+            {produto.nome}
+          </Text>
+
+          {avaliacoes.length > 0 ? <Rating value={media} count={avaliacoes.length} /> : null}
+
+          <Price value={preco} from={hasVariation && !color && !grade} style={styles.price} />
+
+          {produto.descricao ? <Text style={styles.description}>{produto.descricao}</Text> : null}
+
+          {cores.length > 0 ? (
+            <ColorPicker colors={cores} selectedId={color?.id_produto_cor} onSelect={setColor} />
+          ) : null}
+
+          {grades.length > 0 ? (
+            <SizePicker grades={grades} selectedId={grade?.id_produto_grade} onSelect={setGrade} />
+          ) : null}
+
+          <ReviewsSection reviews={avaliacoes} average={media} />
+
+          {related.items.length > 0 ? (
+            <View style={styles.related}>
+              <Text style={styles.relatedTitle}>Você também pode gostar</Text>
+              <FlatList
+                data={related.items}
+                keyExtractor={(item) => String(item.id_produto)}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.relatedList}
+                contentContainerStyle={styles.relatedRail}
+                renderItem={({ item }) => (
+                  <View style={styles.relatedItem}>
+                    <ProductCard product={item} onPress={openRelated} />
+                  </View>
+                )}
+              />
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
+
+      <View style={styles.bar}>
+        {!buyable ? (
+          <Text style={styles.hint}>Produto sem opções de compra no momento</Text>
+        ) : needsColor || needsGrade ? (
+          <Text style={styles.hint}>
+            Selecione {needsColor ? "a cor" : ""}
+            {needsColor && needsGrade ? " e " : ""}
+            {needsGrade ? "o tamanho" : ""} para continuar
+          </Text>
+        ) : null}
+        <Button
+          title={isAuthenticated ? "Adicionar ao carrinho" : "Entrar para comprar"}
+          onPress={onAddToCart}
+          loading={adding}
+          disabled={!buyable || needsColor || needsGrade}
+        />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function ReviewsSection({ reviews, average }: { reviews: ProductReview[]; average: number }) {
+  const { typography } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  if (reviews.length === 0) {
+    return (
+      <View style={styles.reviews}>
+        <Text style={typography.heading}>Avaliações</Text>
+        <Text style={styles.reviewEmpty}>Este produto ainda não tem avaliações.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.reviews}>
+      <View style={styles.reviewsHeader}>
+        <Text style={typography.heading}>Avaliações</Text>
+        <Rating value={average} count={reviews.length} size={14} />
+      </View>
+      {reviews.map((review) => (
+        <View key={review.id_avaliacao_produto} style={styles.review}>
+          <Rating value={numeroSeguro(review.nota, 0)} size={13} showValue={false} />
+          {review.titulo ? <Text style={styles.reviewTitle}>{review.titulo}</Text> : null}
+          {review.comentario ? <Text style={styles.reviewBody}>{review.comentario}</Text> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const makeStyles = ({ colors, typography, spacing }: Theme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { paddingBottom: spacing.xxl },
+    body: { padding: spacing.lg, gap: spacing.md },
+    category: { ...typography.caption, textTransform: "uppercase", letterSpacing: 0.5 },
+    name: { ...typography.title },
+    price: { fontSize: 22 },
+    description: { ...typography.body, color: colors.textMuted, lineHeight: 21 },
+    reviews: { marginTop: spacing.sm, gap: spacing.sm },
+    reviewsHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    reviewEmpty: { ...typography.caption },
+    review: {
+      gap: 4,
+      paddingTop: spacing.sm,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    reviewTitle: { ...typography.body, fontWeight: "600" },
+    reviewBody: { ...typography.body, color: colors.textMuted },
+    related: { marginTop: spacing.md, gap: spacing.sm },
+    relatedTitle: { ...typography.heading },
+    relatedList: { marginHorizontal: -spacing.lg },
+    relatedRail: { paddingHorizontal: spacing.lg, gap: spacing.md },
+    relatedItem: { width: 150 },
+    bar: {
+      padding: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+      gap: spacing.xs,
+    },
+    hint: { ...typography.caption, textAlign: "center", color: colors.danger },
+  });

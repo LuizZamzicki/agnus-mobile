@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 import { StyleSheet, Text, TextInput, TextInputProps, View } from "react-native";
 
-import { colors, radius, spacing, typography } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 interface TextFieldProps extends TextInputProps {
   label: string;
@@ -14,6 +14,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   { label, error, hint, right, style, ...props },
   ref,
 ) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
@@ -35,21 +37,22 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   );
 });
 
-const styles = StyleSheet.create({
-  wrap: { gap: 6 },
-  label: { ...typography.caption, color: colors.text, fontWeight: "600" },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    minHeight: 48,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  inputRowError: { borderColor: colors.danger },
-  input: { flex: 1, fontSize: 15, color: colors.text, paddingVertical: spacing.sm },
-  error: { fontSize: 12, color: colors.danger },
-  hint: { fontSize: 12, color: colors.textMuted },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    wrap: { gap: 6 },
+    label: { ...typography.caption, color: colors.text, fontWeight: "600" },
+    inputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      minHeight: 48,
+      paddingHorizontal: spacing.md,
+      borderRadius: radius.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    inputRowError: { borderColor: colors.danger },
+    input: { flex: 1, fontSize: 15, color: colors.text, paddingVertical: spacing.sm },
+    error: { fontSize: 12, color: colors.danger },
+    hint: { fontSize: 12, color: colors.textMuted },
+  });

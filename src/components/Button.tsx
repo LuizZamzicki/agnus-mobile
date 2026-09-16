@@ -1,7 +1,7 @@
 import React from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, ViewStyle } from "react-native";
 
-import { colors, radius, spacing } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 
@@ -22,6 +22,14 @@ export function Button({
   disabled,
   style,
 }: ButtonProps) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
+  const variantStyles: Record<Variant, ViewStyle> = {
+    primary: { backgroundColor: colors.primary },
+    secondary: { backgroundColor: colors.surfaceAlt },
+    ghost: { backgroundColor: "transparent" },
+    danger: { backgroundColor: colors.danger },
+  };
   const isDisabled = disabled || loading;
   return (
     <Pressable
@@ -55,24 +63,18 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    minHeight: 48,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.md,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  pressed: { opacity: 0.85 },
-  disabled: { opacity: 0.5 },
-  label: { fontSize: 15, fontWeight: "600", color: colors.text },
-  labelOnDark: { color: colors.primaryText },
-});
-
-const variantStyles: Record<Variant, ViewStyle> = {
-  primary: { backgroundColor: colors.primary },
-  secondary: { backgroundColor: colors.surfaceAlt },
-  ghost: { backgroundColor: "transparent" },
-  danger: { backgroundColor: colors.danger },
-};
+const makeStyles = ({ colors, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    base: {
+      minHeight: 48,
+      paddingHorizontal: spacing.lg,
+      borderRadius: radius.md,
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+    },
+    pressed: { opacity: 0.85 },
+    disabled: { opacity: 0.5 },
+    label: { fontSize: 15, fontWeight: "600", color: colors.text },
+    labelOnDark: { color: colors.primaryText },
+  });

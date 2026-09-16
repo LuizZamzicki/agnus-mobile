@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, radius, spacing, typography } from "../theme";
+import { useThemedStyles, type Theme } from "../theme";
 
 import { Button } from "./Button";
 
@@ -28,6 +28,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable style={styles.backdrop} onPress={loading ? undefined : onCancel}>
@@ -55,24 +56,25 @@ export function ConfirmDialog({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.xl,
-  },
-  card: {
-    width: "100%",
-    maxWidth: 360,
-    backgroundColor: colors.background,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  title: { ...typography.heading },
-  message: { ...typography.body, color: colors.textMuted },
-  actions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
-  action: { flex: 1 },
-});
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.xl,
+    },
+    card: {
+      width: "100%",
+      maxWidth: 360,
+      backgroundColor: colors.background,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      gap: spacing.sm,
+    },
+    title: { ...typography.heading },
+    message: { ...typography.body, color: colors.textMuted },
+    actions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
+    action: { flex: 1 },
+  });

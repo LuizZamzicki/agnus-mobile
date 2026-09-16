@@ -5,13 +5,102 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Reestruturação: Expo Router
+
+- **Navegação migrada de React Navigation para `expo-router`** (roteamento por
+  arquivos em `app/`), mantendo as mesmas telas, parâmetros e deep links
+  (`agnusapp://catalogo`, `/carrinho`, `/produto/:id`, `/pedido/:id_pedido`, ...).
+  `src/navigation/` e `src/screens/` saem; `App.tsx`/`index.ts` são substituídos
+  por `app/_layout.tsx`.
+- **Pastas de `src/` reorganizadas** por recurso/feature: `api/` → `actions/`
+  (+ `lib/api.ts` pro cliente fetch), `auth/`+`cart/` → `contexts/`,
+  `tokenStore.ts` → `lib/secureStorage.ts`, hooks e components divididos por
+  recurso (`hooks/produtos/`, `hooks/enderecos/`, `components/conta/`,
+  `components/layout/`, ...).
+
+### Login com Google
+
+- Botão **"Continuar com Google"** na tela de login. Fluxo **web via navegador**
+  (`expo-auth-session` + `expo-web-browser`): o app abre
+  `GET {API}/auth/google?redirect=<url-do-app>`, o backend faz o OAuth e no
+  callback redireciona pra `<url-do-app>?token=…`; o app lê o token e hidrata com
+  `/auth/me`. **Roda no Expo Go** (iOS e Android) — sem módulo nativo, sem dev
+  build, sem conta Apple. `AuthContext` ganha `signInWithGoogle()` e
+  `googleEnabled`; contas `administrador` continuam barradas.
+- `EXPO_PUBLIC_GOOGLE_LOGIN=false` esconde o botão (quando o backend não tem o
+  Google OAuth no ambiente).
+- **No `agnus-back`**: `GET /auth/google` passou a aceitar `?redirect=` (embutido
+  no `state` assinado) e, no callback, redirecionar pra essa URL com `?token=` em
+  vez do `FRONTEND_URL` — só pra esquemas de um allowlist (`exp://`, `exp+`,
+  `agnusapp://`, `http://localhost`, `http://127.0.0.1`), pra não virar open
+  redirect com o token. Fluxo web (sem `redirect`) segue igual.
+
+### Checkout
+
+- Corrige "Não foi possível concluir o pedido: Item do carrinho nao encontrado":
+  a limpeza do carrinho depois de criar o pedido virou **best-effort** — se um
+  item do carrinho já não existe no back, o pedido não é mais reprovado (evita
+  também pedido duplicado num retry). `removeCartItem` trata `404` como sucesso.
+- Checkout revalida o carrinho ao abrir (`refetch`), pra não finalizar sobre
+  itens defasados do cache offline. `useCart().refetch` agora tem identidade
+  estável.
+
+### Produto
+
+- A tela de produto abre com a **primeira cor e o primeiro tamanho já
+  selecionados** (só marca o que ainda não foi escolhido, então pull-to-refresh
+  não desfaz a seleção do usuário).
+- **Carrossel "Você também pode gostar"** no fim da tela: produtos da mesma
+  categoria (ou mais vendidos, quando o produto não tem categoria), sem o produto
+  atual, no máximo 10. Hook `useRelatedProducts`; tocar num card empilha uma nova
+  tela de produto (`navigation.push`).
+- Adicionar ao carrinho não usa mais `Alert.alert`: agora um **toast** animado
+  (entra com mola, ícone, nome do produto em destaque, chip de ação "Ver carrinho"
+  e barra de progresso que esvazia até sumir). Toca pra fechar. Componente
+  reutilizável `ToastProvider` / `useToast()` (`src/components/Toast.tsx`),
+  temático, com variante de erro.
+
+### Tema claro/escuro
+
+- **Modo claro/escuro dinâmico**: por padrão segue o tema do sistema
+  (`userInterfaceStyle: "automatic"` + `useColorScheme`), com opção de fixar em
+  **Sistema / Claro / Escuro** na Conta → **Aparência** (`AppearanceScreen`). A
+  preferência é salva no `AsyncStorage` (`agnus.theme-preference`).
+- Infra em `src/theme`: `ThemeProvider`, `useTheme()` (tema resolvido para JSX),
+  `useThemePreference()` e `useThemedStyles(makeStyles)` para folhas de estilo que
+  reagem ao tema; `useNavigationTheme()` para o tema de navegação do Expo Router. Paletas
+  `lightColors` / `darkColors` e `typography` derivada das cores.
+- Todos os componentes/telas migrados de `import { colors }` estático para
+  `const styles = useThemedStyles(makeStyles)` + `makeStyles = ({ colors }: Theme) => StyleSheet.create(...)`.
+
+### Endereços — formulário
+
+- **Primeiro endereço entra como principal**: quando o usuário ainda não tem
+  endereços, o toggle "principal" já vem ligado e travado.
+- **UF vira combobox** (`Select`): lista dos 27 estados num modal, sem digitação
+  livre.
+- **Cidade com autocomplete** (`Autocomplete` + IBGE): ao digitar aparece uma
+  lista de até 5 municípios válidos da UF selecionada (acima do campo); tocar
+  seleciona e completa; digitar o nome completo correto seleciona sozinho; cidade
+  fora da lista é recusada no envio. Municípios vêm da API pública do IBGE
+  (`localidades/estados/{UF}/municipios`), cacheados pelo React Query. Sem lista
+  carregada (offline), o campo aceita o texto como está.
+
 ### Infra
 
-- **Expo SDK 57 → 54** (`react-native` 0.86 → 0.81, `react` 19.2 → 19.1). O
-  `create-expo-app` gerou o projeto na SDK 57; o Expo Go usado para testar está na
-  SDK 54. Todas as dependências gerenciadas (`expo-*`, libs nativas, `netinfo`,
-  `eslint-config-expo` `~10`, `typescript` `~5.9`) foram fixadas nas versões da
-  SDK 54 (`expo install --check` diz "up to date"). Sem mudança de código de app.
+- **Expo SDK 54 → 57** (`react-native` 0.81 → 0.86, `react` 19.1 → 19.2,
+  `typescript` `~5.9` → `~6.0`, `eslint-config-expo` `~10` → `~57`, `netinfo` 11 →
+  12). O Expo Go da App Store só instala a SDK mais recente e o projeto tinha sido
+  fixado na 54 pra rodar no Expo Go da época — quando o Expo Go do aparelho
+  atualizou pra 57, a 54 deixou de abrir. `expo install --fix` alinhou as libs
+  gerenciadas; `expo-doctor` sem apontamentos. `app.config.ts` ganhou os plugins
+  `expo-image` e `expo-status-bar` (agora obrigatórios). Ajustes de código pela
+  regra `react-hooks` mais rígida do `eslint-config-expo` 57: `Animated.Value` do
+  toast via `useState` em vez de `useRef().current`; a pré-seleção de cor/tamanho
+  na tela de produto passou a ser derivada no render em vez de `setState` num
+  efeito.
+- Antes disso o projeto tinha sido **fixado na SDK 54** (gerado pelo
+  `create-expo-app` na 57) pra rodar no Expo Go.
 
 ### Polimento
 

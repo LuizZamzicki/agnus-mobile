@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { forwardRef, useState } from "react";
 import { Pressable, TextInput, TextInputProps } from "react-native";
 
-import { colors } from "../theme";
+import { useTheme } from "../theme";
 
 import { TextField } from "./TextField";
 
@@ -16,6 +16,7 @@ export const PasswordField = forwardRef<TextInput, PasswordFieldProps>(function 
   { label, error, hint, ...props },
   ref,
 ) {
+  const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
 
   return (

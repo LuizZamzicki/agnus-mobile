@@ -8,8 +8,8 @@ Consome a API existente (`agnus-composer/agnus-back`) por HTTP. Sem nada do pain
 ## Stack
 
 - Expo (managed) + React Native + TypeScript
-- `@react-navigation/native` (native-stack + bottom-tabs)
-- `@tanstack/react-query` + cliente `fetch` tipado (`src/api/client.ts`)
+- `expo-router` (roteamento por arquivos em `app/`)
+- `@tanstack/react-query` + cliente `fetch` tipado (`src/lib/api.ts`)
 - `expo-secure-store` (JWT) + `AuthContext`
 - `CartContext` para o carrinho
 - `react-hook-form` + `zod`
@@ -58,6 +58,29 @@ npx expo start
 
 Tudo roda no **Expo Go** — nenhuma dependência exige dev build.
 
+## Login com Google
+
+Opcional (ligado por padrão; `EXPO_PUBLIC_GOOGLE_LOGIN=false` esconde o botão).
+Fluxo **web via navegador** (`expo-auth-session` + `expo-web-browser`), então
+**funciona no Expo Go** no iOS e no Android — sem client OAuth no app, sem dev
+build, sem conta Apple.
+
+Como funciona: o app abre `GET {API}/auth/google?redirect=<url-do-app>` no
+navegador; o backend faz o OAuth com o Google (usando o client Web dele) e, no
+callback, redireciona pra `<url-do-app>?token=…`. O app lê o `token` e hidrata a
+sessão com `/auth/me`.
+
+Requisitos no **`agnus-back`** (o app não precisa de nada além da API):
+
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` /
+  `GOOGLE_OAUTH_SCOPES` / `GOOGLE_STATE_SECRET` configurados (já usados no login
+  web).
+- O `GET /auth/google` aceita `?redirect=` e só repassa esquemas do allowlist
+  (`exp://`, `exp+`, `agnusapp://`, `http://localhost`, `http://127.0.0.1`) — o
+  resto cai no `FRONTEND_URL` normal.
+- No Google Cloud Console, o **redirect URI autorizado** do client Web continua
+  sendo só o `GOOGLE_REDIRECT_URI` do backend; o Google nunca vê o `exp://`.
+
 ## Build de teste (EAS)
 
 `eas.json` traz os perfis `development`, `preview` e `production`. Para um APK
@@ -91,16 +114,37 @@ conexão.
 ## Estrutura
 
 ```text
+app/
+  _layout.tsx            providers + <Stack> raiz
+  +not-found.tsx
+  produto/[id].tsx
+  login.tsx
+  checkout.tsx
+  pedido/[id_pedido].tsx
+  (tabs)/
+    _layout.tsx           <Tabs>
+    index.tsx              Início
+    catalogo.tsx
+    carrinho.tsx
+    conta/
+      _layout.tsx           <Stack> da conta
+      index.tsx
+      perfil.tsx
+      senha.tsx
+      enderecos/
+      contatos/
+      pedidos/
+      aparencia.tsx
+
 src/
-  api/         client.ts (fetch tipado) + módulos por recurso
+  actions/     módulos por recurso (fetch tipado via lib/api.ts)
   types/       tipos da API
-  auth/        AuthContext + tokenStore (SecureStore)
-  cart/        CartContext
+  contexts/    AuthContext, CartContext, errors
+  lib/         api.ts (cliente fetch), secureStorage.ts (JWT), env, format, cpf, ...
   query/       QueryClient
-  navigation/  RootNavigator, Tabs, tipos de rota
-  screens/     Home, Catalog, Product, Cart, Login, Account, NotFound
-  components/  Screen, Button, EmptyState, ...
-  lib/         env, assetUrl, format, cpf, passwordStrength (portados do web)
+  hooks/       produtos/, categorias/, enderecos/, contatos/, pedidos/, localidades/
+  components/  kit de UI genérico (Button, EmptyState, ...) + subpastas por feature
+               (produtos/, carrinho/, conta/, layout/, auth/)
   theme/       cores, spacing, tipografia
 ```
 

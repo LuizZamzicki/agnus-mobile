@@ -10,7 +10,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: "0.1.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
-  userInterfaceStyle: "light",
+  userInterfaceStyle: "automatic",
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
@@ -30,8 +30,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: "./assets/favicon.png",
   },
   plugins: [
+    "expo-router",
     "expo-secure-store",
     "expo-font",
+    "expo-image",
+    "expo-status-bar",
+    "expo-web-browser",
     [
       "expo-splash-screen",
       {
@@ -44,5 +48,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ],
   extra: {
     apiUrl: API_URL,
+    // Botão "Continuar com Google" na tela de login. Desligue com
+    // EXPO_PUBLIC_GOOGLE_LOGIN=false se o backend não tiver o Google OAuth
+    // configurado no ambiente. O fluxo é web (expo-auth-session), roda no Expo Go.
+    googleLogin: process.env.EXPO_PUBLIC_GOOGLE_LOGIN !== "false",
   },
 });

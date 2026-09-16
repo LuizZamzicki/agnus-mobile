@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, radius } from "../theme";
+import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 interface QtyStepperProps {
   value: number;
@@ -13,6 +13,7 @@ interface QtyStepperProps {
 }
 
 export function QtyStepper({ value, onChange, min = 1, max = 99, disabled }: QtyStepperProps) {
+  const styles = useThemedStyles(makeStyles);
   const dec = () => onChange(Math.max(min, value - 1));
   const inc = () => onChange(Math.min(max, value + 1));
 
@@ -36,6 +37,8 @@ function Step({
   disabled?: boolean;
   label: string;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -50,17 +53,24 @@ function Step({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    backgroundColor: colors.background,
-  },
-  disabled: { opacity: 0.6 },
-  step: { width: 34, height: 34, alignItems: "center", justifyContent: "center" },
-  pressed: { backgroundColor: colors.surfaceAlt },
-  value: { minWidth: 28, textAlign: "center", fontSize: 15, fontWeight: "600", color: colors.text },
-});
+const makeStyles = ({ colors, radius }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      backgroundColor: colors.background,
+    },
+    disabled: { opacity: 0.6 },
+    step: { width: 34, height: 34, alignItems: "center", justifyContent: "center" },
+    pressed: { backgroundColor: colors.surfaceAlt },
+    value: {
+      minWidth: 28,
+      textAlign: "center",
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.text,
+    },
+  });

@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, radius, spacing } from "../theme";
+import { useThemedStyles, type Theme } from "../theme";
 
 interface SegmentedTabsProps<T extends string> {
   options: { value: T; label: string }[];
@@ -14,6 +14,7 @@ export function SegmentedTabs<T extends string>({
   value,
   onChange,
 }: SegmentedTabsProps<T>) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.container}>
       {options.map((option) => {
@@ -34,21 +35,22 @@ export function SegmentedTabs<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    padding: 4,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceAlt,
-    gap: 4,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.sm,
-    alignItems: "center",
-  },
-  tabActive: { backgroundColor: colors.background },
-  label: { fontSize: 14, fontWeight: "600", color: colors.textMuted },
-  labelActive: { color: colors.text },
-});
+const makeStyles = ({ colors, spacing, radius }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      padding: 4,
+      borderRadius: radius.md,
+      backgroundColor: colors.surfaceAlt,
+      gap: 4,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.sm,
+      alignItems: "center",
+    },
+    tabActive: { backgroundColor: colors.background },
+    label: { fontSize: 14, fontWeight: "600", color: colors.textMuted },
+    labelActive: { color: colors.text },
+  });

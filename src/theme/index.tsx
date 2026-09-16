@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DarkTheme, DefaultTheme, type Theme as NavTheme } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, type Theme as NavTheme } from "expo-router";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { StyleSheet, useColorScheme, type TextStyle } from "react-native";
 

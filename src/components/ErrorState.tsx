@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { ApiError } from "../api/client";
+import { ApiError } from "../lib/api";
 import { useTheme, useThemedStyles, type Theme } from "../theme";
 
 import { Button } from "./Button";

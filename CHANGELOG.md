@@ -5,6 +5,19 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Reestruturação: Expo Router
+
+- **Navegação migrada de React Navigation para `expo-router`** (roteamento por
+  arquivos em `app/`), mantendo as mesmas telas, parâmetros e deep links
+  (`agnusapp://catalogo`, `/carrinho`, `/produto/:id`, `/pedido/:id_pedido`, ...).
+  `src/navigation/` e `src/screens/` saem; `App.tsx`/`index.ts` são substituídos
+  por `app/_layout.tsx`.
+- **Pastas de `src/` reorganizadas** por recurso/feature: `api/` → `actions/`
+  (+ `lib/api.ts` pro cliente fetch), `auth/`+`cart/` → `contexts/`,
+  `tokenStore.ts` → `lib/secureStorage.ts`, hooks e components divididos por
+  recurso (`hooks/produtos/`, `hooks/enderecos/`, `components/conta/`,
+  `components/layout/`, ...).
+
 ### Login com Google
 
 - Botão **"Continuar com Google"** na tela de login. Fluxo **web via navegador**
@@ -55,7 +68,7 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   preferência é salva no `AsyncStorage` (`agnus.theme-preference`).
 - Infra em `src/theme`: `ThemeProvider`, `useTheme()` (tema resolvido para JSX),
   `useThemePreference()` e `useThemedStyles(makeStyles)` para folhas de estilo que
-  reagem ao tema; `useNavigationTheme()` para o React Navigation. Paletas
+  reagem ao tema; `useNavigationTheme()` para o tema de navegação do Expo Router. Paletas
   `lightColors` / `darkColors` e `typography` derivada das cores.
 - Todos os componentes/telas migrados de `import { colors }` estático para
   `const styles = useThemedStyles(makeStyles)` + `makeStyles = ({ colors }: Theme) => StyleSheet.create(...)`.

@@ -8,8 +8,8 @@ Consome a API existente (`agnus-composer/agnus-back`) por HTTP. Sem nada do pain
 ## Stack
 
 - Expo (managed) + React Native + TypeScript
-- `@react-navigation/native` (native-stack + bottom-tabs)
-- `@tanstack/react-query` + cliente `fetch` tipado (`src/api/client.ts`)
+- `expo-router` (roteamento por arquivos em `app/`)
+- `@tanstack/react-query` + cliente `fetch` tipado (`src/lib/api.ts`)
 - `expo-secure-store` (JWT) + `AuthContext`
 - `CartContext` para o carrinho
 - `react-hook-form` + `zod`
@@ -114,16 +114,37 @@ conexão.
 ## Estrutura
 
 ```text
+app/
+  _layout.tsx            providers + <Stack> raiz
+  +not-found.tsx
+  produto/[id].tsx
+  login.tsx
+  checkout.tsx
+  pedido/[id_pedido].tsx
+  (tabs)/
+    _layout.tsx           <Tabs>
+    index.tsx              Início
+    catalogo.tsx
+    carrinho.tsx
+    conta/
+      _layout.tsx           <Stack> da conta
+      index.tsx
+      perfil.tsx
+      senha.tsx
+      enderecos/
+      contatos/
+      pedidos/
+      aparencia.tsx
+
 src/
-  api/         client.ts (fetch tipado) + módulos por recurso
+  actions/     módulos por recurso (fetch tipado via lib/api.ts)
   types/       tipos da API
-  auth/        AuthContext + tokenStore (SecureStore)
-  cart/        CartContext
+  contexts/    AuthContext, CartContext, errors
+  lib/         api.ts (cliente fetch), secureStorage.ts (JWT), env, format, cpf, ...
   query/       QueryClient
-  navigation/  RootNavigator, Tabs, tipos de rota
-  screens/     Home, Catalog, Product, Cart, Login, Account, NotFound
-  components/  Screen, Button, EmptyState, ...
-  lib/         env, assetUrl, format, cpf, passwordStrength (portados do web)
+  hooks/       produtos/, categorias/, enderecos/, contatos/, pedidos/, localidades/
+  components/  kit de UI genérico (Button, EmptyState, ...) + subpastas por feature
+               (produtos/, carrinho/, conta/, layout/, auth/)
   theme/       cores, spacing, tipografia
 ```
 

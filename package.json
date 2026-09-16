@@ -1,7 +1,7 @@
 {
   "name": "agnus-mobile",
   "version": "0.1.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "private": true,
   "scripts": {
     "start": "expo start",
@@ -18,9 +18,6 @@
     "@hookform/resolvers": "^5.9.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "12.0.1",
-    "@react-navigation/bottom-tabs": "^7.18.18",
-    "@react-navigation/native": "^7.3.18",
-    "@react-navigation/native-stack": "^7.18.10",
     "@tanstack/query-async-storage-persister": "^5.102.8",
     "@tanstack/react-query": "^5.102.8",
     "@tanstack/react-query-persist-client": "^5.102.8",
@@ -31,6 +28,7 @@
     "expo-font": "~57.0.3",
     "expo-image": "~57.0.4",
     "expo-linking": "~57.0.9",
+    "expo-router": "~57.0.21",
     "expo-secure-store": "~57.0.3",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",

@@ -56,7 +56,7 @@ function RootStack() {
       <ThemedStatusBar />
       <OfflineBanner />
       <SplashGate>
-        <Stack>
+        <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="produto/[id]" options={{ title: "Produto" }} />
           <Stack.Screen name="login" options={{ title: "Entrar", presentation: "modal" }} />

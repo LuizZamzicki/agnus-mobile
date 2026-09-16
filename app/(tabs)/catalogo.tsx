@@ -65,7 +65,7 @@ export default function CatalogScreen() {
     router.push({ pathname: "/produto/[id]", params: { id: String(product.id_produto) } });
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safe} edges={["left", "right"]}>
       <View style={styles.header}>
         <View style={styles.searchRow}>
           <View style={styles.searchField}>

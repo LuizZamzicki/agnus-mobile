@@ -38,7 +38,7 @@ export default function CartScreen() {
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <EmptyState
           title="Seu carrinho espera por você"
           message="Entre para adicionar produtos e finalizar a compra."
@@ -51,14 +51,14 @@ export default function CartScreen() {
 
   if (cart.isError) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <ErrorState onRetry={cart.refetch} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safe} edges={["left", "right"]}>
       <FlatList
         data={cart.items}
         keyExtractor={(item) => String(item.id_carrinho_item)}

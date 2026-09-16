@@ -51,7 +51,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safe} edges={["left", "right"]}>
       <View style={styles.searchWrap}>
         <SearchBar value={search} onChangeText={setSearch} onSubmit={submitSearch} />
       </View>

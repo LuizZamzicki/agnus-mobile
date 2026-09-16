@@ -5,7 +5,6 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -22,18 +21,19 @@ import { useTheme, useThemedStyles, type Theme } from "../../src/theme";
 import type { CatalogProduct } from "../../src/types/product";
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const [search, setSearch] = useState("");
   const bestSellers = useBestSellers(8);
-  const highlights = useCatalog({});
+  const catalog = useCatalog({});
   const categories = useCategories();
 
-  const highlightItems = (highlights.data?.pages[0]?.data ?? []).slice(0, 8);
-  const refreshing = bestSellers.isRefetching || highlights.isRefetching;
+  const products = catalog.data?.pages.flatMap((page) => page.data) ?? [];
+  const refreshing = bestSellers.isRefetching || catalog.isRefetching;
   const onRefresh = () => {
     bestSellers.refetch();
-    highlights.refetch();
+    catalog.refetch();
     categories.refetch();
   };
 
@@ -56,41 +56,60 @@ export default function HomeScreen() {
         <SearchBar value={search} onChangeText={setSearch} onSubmit={submitSearch} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        {categories.data && categories.data.length > 0 ? (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Categorias</Text>
-            </View>
-            <View style={styles.categoryChips}>
-              <CategoryChips categories={categories.data} onSelect={openCatalog} />
-            </View>
-          </View>
-        ) : null}
-
-        <Rail
-          title="Mais vendidos"
-          query={bestSellers}
-          onRetry={() => bestSellers.refetch()}
-          onPressItem={openProduct}
-        />
-
-        <Rail
-          title="Destaques do catálogo"
-          query={{
-            data: highlightItems,
-            isPending: highlights.isPending,
-            isError: highlights.isError,
-            error: highlights.error,
+      {catalog.isPending ? (
+        <ActivityIndicator style={styles.railLoading} color={colors.primary} />
+      ) : catalog.isError ? (
+        <View style={styles.railError}>
+          <ErrorState error={catalog.error} onRetry={() => catalog.refetch()} />
+        </View>
+      ) : (
+        <FlatList
+          data={products}
+          keyExtractor={(item) => String(item.id_produto)}
+          numColumns={2}
+          columnWrapperStyle={styles.column}
+          contentContainerStyle={styles.content}
+          renderItem={({ item }) => <ProductCard product={item} onPress={openProduct} />}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (catalog.hasNextPage && !catalog.isFetchingNextPage) catalog.fetchNextPage();
           }}
-          onRetry={() => highlights.refetch()}
-          onPressItem={openProduct}
-          onSeeAll={() => openCatalog()}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListHeaderComponent={
+            <>
+              {categories.data && categories.data.length > 0 ? (
+                <View style={styles.section}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Categorias</Text>
+                  </View>
+                  <View style={styles.categoryChips}>
+                    <CategoryChips categories={categories.data} onSelect={openCatalog} />
+                  </View>
+                </View>
+              ) : null}
+
+              <Rail
+                title="Mais vendidos"
+                query={bestSellers}
+                onRetry={() => bestSellers.refetch()}
+                onPressItem={openProduct}
+              />
+
+              <View style={[styles.section, styles.sectionHeader]}>
+                <Text style={styles.sectionTitle}>Todos os produtos</Text>
+              </View>
+            </>
+          }
+          ListEmptyComponent={<Text style={styles.railEmpty}>Nenhum produto encontrado.</Text>}
+          ListFooterComponent={
+            catalog.isFetchingNextPage ? (
+              <ActivityIndicator style={styles.footer} color={colors.primary} />
+            ) : products.length > 0 && !catalog.hasNextPage ? (
+              <Text style={styles.end}>Você chegou ao fim</Text>
+            ) : null
+          }
         />
-      </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -164,7 +183,8 @@ const makeStyles = ({ colors, typography, spacing }: Theme) =>
       paddingTop: spacing.sm,
       paddingBottom: spacing.xs,
     },
-    content: { paddingBottom: spacing.xxl },
+    content: { paddingBottom: spacing.xxl, gap: spacing.md },
+    column: { gap: spacing.md, paddingHorizontal: spacing.lg },
     section: { marginTop: spacing.lg, gap: spacing.sm },
     sectionHeader: {
       flexDirection: "row",
@@ -180,4 +200,11 @@ const makeStyles = ({ colors, typography, spacing }: Theme) =>
     railLoading: { paddingVertical: spacing.xl },
     railError: { height: 180 },
     railEmpty: { paddingHorizontal: spacing.lg, color: colors.textMuted, fontSize: 13 },
+    footer: { paddingVertical: spacing.lg },
+    end: {
+      textAlign: "center",
+      color: colors.textMuted,
+      fontSize: 13,
+      paddingVertical: spacing.lg,
+    },
   });

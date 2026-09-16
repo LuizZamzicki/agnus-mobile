@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -12,10 +12,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "../../src/components/Button";
 import { CategoryChips } from "../../src/components/produtos/CategoryChips";
 import { ErrorState } from "../../src/components/ErrorState";
 import { ProductCard } from "../../src/components/produtos/ProductCard";
+import { SearchBar } from "../../src/components/layout/SearchBar";
 import { useCategories } from "../../src/hooks/categorias";
 import { useBestSellers, useCatalog } from "../../src/hooks/produtos";
 import { useTheme, useThemedStyles, type Theme } from "../../src/theme";
@@ -24,6 +24,7 @@ import type { CatalogProduct } from "../../src/types/product";
 export default function HomeScreen() {
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
+  const [search, setSearch] = useState("");
   const bestSellers = useBestSellers(8);
   const highlights = useCatalog({});
   const categories = useCategories();
@@ -44,23 +45,21 @@ export default function HomeScreen() {
         ? { pathname: "/catalogo", params: { id_categoria: String(id_categoria) } }
         : "/catalogo",
     );
+  const submitSearch = () => {
+    const q = search.trim();
+    router.push(q ? { pathname: "/catalogo", params: { q } } : "/catalogo");
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+      <View style={styles.searchWrap}>
+        <SearchBar value={search} onChangeText={setSearch} onSubmit={submitSearch} />
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View style={styles.hero}>
-          <Text style={styles.heroKicker}>AGNUS</Text>
-          <Text style={styles.heroTitle} accessibilityRole="header">
-            Vestuário e calçados com a sua cara
-          </Text>
-          <View style={styles.heroAction}>
-            <Button title="Ver catálogo" onPress={() => openCatalog()} />
-          </View>
-        </View>
-
         {categories.data && categories.data.length > 0 ? (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -160,17 +159,12 @@ function Rail({
 const makeStyles = ({ colors, typography, spacing }: Theme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
-    content: { paddingBottom: spacing.xxl },
-    hero: {
-      margin: spacing.lg,
-      padding: spacing.xl,
-      borderRadius: 16,
-      backgroundColor: colors.surfaceAlt,
-      gap: spacing.sm,
+    searchWrap: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xs,
     },
-    heroKicker: { fontSize: 13, fontWeight: "700", letterSpacing: 2, color: colors.textMuted },
-    heroTitle: { ...typography.title, fontSize: 24 },
-    heroAction: { marginTop: spacing.sm, alignSelf: "flex-start" },
+    content: { paddingBottom: spacing.xxl },
     section: { marginTop: spacing.lg, gap: spacing.sm },
     sectionHeader: {
       flexDirection: "row",

@@ -1,13 +1,22 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CategoryChips } from "../../src/components/produtos/CategoryChips";
 import { EmptyState } from "../../src/components/EmptyState";
 import { ErrorState } from "../../src/components/ErrorState";
 import { ProductCard } from "../../src/components/produtos/ProductCard";
-import { Select, type SelectOption } from "../../src/components/Select";
 import { SearchBar } from "../../src/components/layout/SearchBar";
 import { useCategories } from "../../src/hooks/categorias";
 import { useCatalog } from "../../src/hooks/produtos";
@@ -15,7 +24,7 @@ import { useTheme, useThemedStyles, type Theme } from "../../src/theme";
 import type { ProductSort } from "../../src/actions/products";
 import type { CatalogProduct } from "../../src/types/product";
 
-const SORT_OPTIONS: SelectOption[] = [
+const SORT_OPTIONS: { label: string; value: ProductSort | "" }[] = [
   { label: "Relevância", value: "" },
   { label: "Menor preço", value: "preco_asc" },
   { label: "Maior preço", value: "preco_desc" },
@@ -33,6 +42,7 @@ export default function CatalogScreen() {
     params.id_categoria ? Number(params.id_categoria) : undefined,
   );
   const [sort, setSort] = useState<ProductSort | "">("");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
   useEffect(() => {
     const handle = setTimeout(() => setDebouncedSearch(search.trim()), 400);
@@ -57,11 +67,28 @@ export default function CatalogScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <View style={styles.header}>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          onSubmit={() => setDebouncedSearch(search.trim())}
-        />
+        <View style={styles.searchRow}>
+          <View style={styles.searchField}>
+            <SearchBar
+              value={search}
+              onChangeText={setSearch}
+              onSubmit={() => setDebouncedSearch(search.trim())}
+            />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ordenar"
+            hitSlop={8}
+            onPress={() => setSortMenuOpen(true)}
+            style={[styles.filterButton, sort ? styles.filterButtonActive : null]}
+          >
+            <Ionicons
+              name="options-outline"
+              size={20}
+              color={sort ? colors.background : colors.text}
+            />
+          </Pressable>
+        </View>
         {categoriesQuery.data && categoriesQuery.data.length > 0 ? (
           <CategoryChips
             categories={categoriesQuery.data}
@@ -69,15 +96,40 @@ export default function CatalogScreen() {
             onSelect={setCategoryId}
           />
         ) : null}
-        <View style={styles.sort}>
-          <Select
-            label="Ordenar por"
-            value={sort}
-            options={SORT_OPTIONS}
-            onChange={(value) => setSort(value as ProductSort | "")}
-          />
-        </View>
       </View>
+
+      <Modal
+        visible={sortMenuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSortMenuOpen(false)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setSortMenuOpen(false)}>
+          <Pressable style={styles.sheet} onPress={() => {}}>
+            <Text style={styles.sheetTitle}>Ordenar por</Text>
+            {SORT_OPTIONS.map((option) => {
+              const active = option.value === sort;
+              return (
+                <Pressable
+                  key={option.value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => {
+                    setSort(option.value);
+                    setSortMenuOpen(false);
+                  }}
+                  style={[styles.option, active ? styles.optionActive : null]}
+                >
+                  <Text style={[styles.optionText, active ? styles.optionTextActive : null]}>
+                    {option.label}
+                  </Text>
+                  {active ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
+                </Pressable>
+              );
+            })}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {catalog.isPending ? (
         <EmptyState title="Carregando catálogo" loading />
@@ -121,11 +173,23 @@ export default function CatalogScreen() {
   );
 }
 
-const makeStyles = ({ colors, spacing }: Theme) =>
+const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     header: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, gap: spacing.xs },
-    sort: { width: 160, alignSelf: "flex-end" },
+    searchRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+    searchField: { flex: 1 },
+    filterButton: {
+      width: 44,
+      height: 44,
+      borderRadius: radius.md,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    filterButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
     column: { gap: spacing.md },
     footer: { paddingVertical: spacing.lg },
@@ -135,4 +199,31 @@ const makeStyles = ({ colors, spacing }: Theme) =>
       fontSize: 13,
       paddingVertical: spacing.lg,
     },
+    backdrop: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.xl,
+    },
+    sheet: {
+      width: "100%",
+      maxWidth: 320,
+      backgroundColor: colors.background,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      gap: spacing.xs,
+    },
+    sheetTitle: { ...typography.heading, marginBottom: spacing.xs },
+    option: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.sm,
+      borderRadius: radius.sm,
+    },
+    optionActive: { backgroundColor: colors.surfaceAlt },
+    optionText: { fontSize: 15, color: colors.text },
+    optionTextActive: { fontWeight: "700" },
   });

@@ -1,38 +1,39 @@
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "../../src/components/Button";
 import { CategoryChips } from "../../src/components/produtos/CategoryChips";
 import { ErrorState } from "../../src/components/ErrorState";
 import { ProductCard } from "../../src/components/produtos/ProductCard";
+import { SearchBar } from "../../src/components/layout/SearchBar";
 import { useCategories } from "../../src/hooks/categorias";
 import { useBestSellers, useCatalog } from "../../src/hooks/produtos";
 import { useTheme, useThemedStyles, type Theme } from "../../src/theme";
 import type { CatalogProduct } from "../../src/types/product";
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
+  const [search, setSearch] = useState("");
   const bestSellers = useBestSellers(8);
-  const highlights = useCatalog({});
+  const catalog = useCatalog({});
   const categories = useCategories();
 
-  const highlightItems = (highlights.data?.pages[0]?.data ?? []).slice(0, 8);
-  const refreshing = bestSellers.isRefetching || highlights.isRefetching;
+  const products = catalog.data?.pages.flatMap((page) => page.data) ?? [];
+  const refreshing = bestSellers.isRefetching || catalog.isRefetching;
   const onRefresh = () => {
     bestSellers.refetch();
-    highlights.refetch();
+    catalog.refetch();
     categories.refetch();
   };
 
@@ -44,54 +45,71 @@ export default function HomeScreen() {
         ? { pathname: "/catalogo", params: { id_categoria: String(id_categoria) } }
         : "/catalogo",
     );
+  const submitSearch = () => {
+    const q = search.trim();
+    router.push(q ? { pathname: "/catalogo", params: { q } } : "/catalogo");
+  };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View style={styles.hero}>
-          <Text style={styles.heroKicker}>AGNUS</Text>
-          <Text style={styles.heroTitle} accessibilityRole="header">
-            Vestuário e calçados com a sua cara
-          </Text>
-          <View style={styles.heroAction}>
-            <Button title="Ver catálogo" onPress={() => openCatalog()} />
-          </View>
+    <SafeAreaView style={styles.safe} edges={["left", "right"]}>
+      <View style={styles.searchWrap}>
+        <SearchBar value={search} onChangeText={setSearch} onSubmit={submitSearch} />
+      </View>
+
+      {catalog.isPending ? (
+        <ActivityIndicator style={styles.railLoading} color={colors.primary} />
+      ) : catalog.isError ? (
+        <View style={styles.railError}>
+          <ErrorState error={catalog.error} onRetry={() => catalog.refetch()} />
         </View>
-
-        {categories.data && categories.data.length > 0 ? (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Categorias</Text>
-            </View>
-            <View style={styles.categoryChips}>
-              <CategoryChips categories={categories.data} onSelect={openCatalog} />
-            </View>
-          </View>
-        ) : null}
-
-        <Rail
-          title="Mais vendidos"
-          query={bestSellers}
-          onRetry={() => bestSellers.refetch()}
-          onPressItem={openProduct}
-        />
-
-        <Rail
-          title="Destaques do catálogo"
-          query={{
-            data: highlightItems,
-            isPending: highlights.isPending,
-            isError: highlights.isError,
-            error: highlights.error,
+      ) : (
+        <FlatList
+          data={products}
+          keyExtractor={(item) => String(item.id_produto)}
+          numColumns={2}
+          columnWrapperStyle={styles.column}
+          contentContainerStyle={styles.content}
+          renderItem={({ item }) => <ProductCard product={item} onPress={openProduct} />}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (catalog.hasNextPage && !catalog.isFetchingNextPage) catalog.fetchNextPage();
           }}
-          onRetry={() => highlights.refetch()}
-          onPressItem={openProduct}
-          onSeeAll={() => openCatalog()}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListHeaderComponent={
+            <>
+              {categories.data && categories.data.length > 0 ? (
+                <View style={styles.section}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Categorias</Text>
+                  </View>
+                  <View style={styles.categoryChips}>
+                    <CategoryChips categories={categories.data} onSelect={openCatalog} />
+                  </View>
+                </View>
+              ) : null}
+
+              <Rail
+                title="Mais vendidos"
+                query={bestSellers}
+                onRetry={() => bestSellers.refetch()}
+                onPressItem={openProduct}
+              />
+
+              <View style={[styles.section, styles.sectionHeader]}>
+                <Text style={styles.sectionTitle}>Todos os produtos</Text>
+              </View>
+            </>
+          }
+          ListEmptyComponent={<Text style={styles.railEmpty}>Nenhum produto encontrado.</Text>}
+          ListFooterComponent={
+            catalog.isFetchingNextPage ? (
+              <ActivityIndicator style={styles.footer} color={colors.primary} />
+            ) : products.length > 0 && !catalog.hasNextPage ? (
+              <Text style={styles.end}>Você chegou ao fim</Text>
+            ) : null
+          }
         />
-      </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -160,17 +178,13 @@ function Rail({
 const makeStyles = ({ colors, typography, spacing }: Theme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
-    content: { paddingBottom: spacing.xxl },
-    hero: {
-      margin: spacing.lg,
-      padding: spacing.xl,
-      borderRadius: 16,
-      backgroundColor: colors.surfaceAlt,
-      gap: spacing.sm,
+    searchWrap: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xs,
     },
-    heroKicker: { fontSize: 13, fontWeight: "700", letterSpacing: 2, color: colors.textMuted },
-    heroTitle: { ...typography.title, fontSize: 24 },
-    heroAction: { marginTop: spacing.sm, alignSelf: "flex-start" },
+    content: { paddingBottom: spacing.xxl, gap: spacing.md },
+    column: { gap: spacing.md, paddingHorizontal: spacing.lg },
     section: { marginTop: spacing.lg, gap: spacing.sm },
     sectionHeader: {
       flexDirection: "row",
@@ -186,4 +200,11 @@ const makeStyles = ({ colors, typography, spacing }: Theme) =>
     railLoading: { paddingVertical: spacing.xl },
     railError: { height: 180 },
     railEmpty: { paddingHorizontal: spacing.lg, color: colors.textMuted, fontSize: 13 },
+    footer: { paddingVertical: spacing.lg },
+    end: {
+      textAlign: "center",
+      color: colors.textMuted,
+      fontSize: 13,
+      paddingVertical: spacing.lg,
+    },
   });

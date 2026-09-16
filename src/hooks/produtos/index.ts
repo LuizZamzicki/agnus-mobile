@@ -5,11 +5,13 @@ import {
   getCatalog,
   getProductBundle,
   type CatalogParams,
+  type ProductSort,
 } from "../../actions/products";
 
 export interface CatalogFilters {
   id_categoria?: number;
   q?: string;
+  sort?: ProductSort;
 }
 
 const CATALOG_PAGE_SIZE = 12;

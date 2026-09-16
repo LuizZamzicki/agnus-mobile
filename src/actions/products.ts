@@ -12,19 +12,23 @@ import type {
 
 import { request } from "../lib/api";
 
+export type ProductSort = "preco_asc" | "preco_desc";
+
 export interface CatalogParams {
   page?: number;
   limit?: number;
   id_categoria?: number;
   /** Busca no Meilisearch (aceita `q`, `search` ou `busca` no back). */
   q?: string;
+  /** Ordena por preço; sem valor mantém a ordem padrão (id do produto). */
+  sort?: ProductSort;
 }
 
 /** `GET /products/catalog` — vitrine paginada. */
 export function getCatalog(params: CatalogParams = {}): Promise<Paginated<CatalogProduct>> {
-  const { page = 1, limit = 12, id_categoria, q } = params;
+  const { page = 1, limit = 12, id_categoria, q, sort } = params;
   return request<Paginated<CatalogProduct>>("/products/catalog", {
-    query: { page, limit, id_categoria, q: q?.trim() || undefined },
+    query: { page, limit, id_categoria, q: q?.trim() || undefined, sort },
   });
 }
 

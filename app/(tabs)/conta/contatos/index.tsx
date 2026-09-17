@@ -8,7 +8,9 @@ import { Button } from "../../../../src/components/Button";
 import { ConfirmDialog } from "../../../../src/components/ConfirmDialog";
 import { EmptyState } from "../../../../src/components/EmptyState";
 import { ErrorState } from "../../../../src/components/ErrorState";
+import { FormBanner } from "../../../../src/components/FormBanner";
 import { useContacts } from "../../../../src/hooks/contatos";
+import { ApiError } from "../../../../src/lib/api";
 import { useTheme, useThemedStyles, type Theme } from "../../../../src/theme";
 import type { ContactType } from "../../../../src/types/account";
 
@@ -27,13 +29,17 @@ export default function ContactsScreen() {
   const contacts = useContacts();
   const [toDelete, setToDelete] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [banner, setBanner] = useState<string | null>(null);
 
   const confirmDelete = async () => {
     if (toDelete === null) return;
     setDeleting(true);
+    setBanner(null);
     try {
       await deleteUserContact(toDelete);
       await queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    } catch (err) {
+      setBanner(err instanceof ApiError ? err.message : "Não foi possível excluir o contato.");
     } finally {
       setDeleting(false);
       setToDelete(null);
@@ -46,6 +52,11 @@ export default function ContactsScreen() {
 
   return (
     <View style={styles.container}>
+      {banner ? (
+        <View style={styles.banner}>
+          <FormBanner tone="error" message={banner} />
+        </View>
+      ) : null}
       <FlatList
         data={contacts.data ?? []}
         keyExtractor={(item) => String(item.id_usuario_contato)}
@@ -112,6 +123,7 @@ export default function ContactsScreen() {
 const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
+    banner: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
     list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
     card: {
       flexDirection: "row",

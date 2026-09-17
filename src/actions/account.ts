@@ -54,6 +54,14 @@ export function updateUserAddress(id: number, input: AddressInput): Promise<User
   return request<UserAddress>(`/user-addresses/${id}`, { method: "PUT", body: input });
 }
 
+/** Marca o endereço como principal; o back desmarca os demais do usuário. */
+export function setMainAddress(id: number): Promise<UserAddress> {
+  return request<UserAddress>(`/user-addresses/${id}`, {
+    method: "PUT",
+    body: { principal: true },
+  });
+}
+
 export function deleteUserAddress(id: number): Promise<void> {
   return request<void>(`/user-addresses/${id}`, { method: "DELETE" });
 }

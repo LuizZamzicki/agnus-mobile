@@ -9,7 +9,7 @@ import { useTheme } from "../../src/theme";
 const icons = {
   index: "home-outline",
   catalogo: "grid-outline",
-  carrinho: "cart-outline",
+  carrinho: "bag-outline",
   conta: "person-outline",
 } as const;
 
@@ -37,7 +37,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="catalogo" options={{ title: "Catálogo" }} />
       <Tabs.Screen
         name="carrinho"
-        options={{ title: "Carrinho", tabBarBadge: count > 0 ? count : undefined }}
+        options={{ title: "Sacola", tabBarBadge: count > 0 ? count : undefined }}
       />
       <Tabs.Screen name="conta" options={{ title: "Conta", headerShown: false }} />
     </Tabs>

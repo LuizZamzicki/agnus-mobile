@@ -54,6 +54,12 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   `File` do `expo-file-system`. E o iPhone entrega as fotos em HEIC, que o
   backend recusa: o seletor pede a versão compatível (JPEG), como o Safari faz.
   Achado testando no simulador de iPhone.
+- **Aviso de peça adicionada e "sacola"** (AGNUS-224): ao adicionar, o aviso
+  diz "Peça adicionada à sacola" com o nome, a cor e o tamanho, e tem o botão
+  "Ver sacola", como o pop-up do site. Os textos do app trocam "carrinho" por
+  "sacola", o mesmo termo do site e das mensagens da API ("Sua sacola está
+  vazia"); a aba ganha o ícone de sacola. A rota continua `/carrinho`, então o
+  deep link `agnusapp://carrinho` não muda.
 
 ### Reestruturação: Expo Router
 

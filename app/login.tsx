@@ -45,7 +45,7 @@ export default function LoginScreen() {
           </Text>
           <Text style={styles.subtitle}>
             {mode === "login"
-              ? "Use seu e-mail e senha para acessar o carrinho e seus pedidos."
+              ? "Use seu e-mail e senha para acessar a sacola e seus pedidos."
               : "Leva menos de um minuto."}
           </Text>
 

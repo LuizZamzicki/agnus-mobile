@@ -48,6 +48,12 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   4 fotos da galeria (`expo-image-picker`, roda no Expo Go) enviadas em
   multipart. Quem já avaliou pode alterar ou excluir. Se o texto salvar e as
   fotos falharem, o app avisa e volta, sem duplicar a avaliação.
+- **Envio das fotos da avaliação corrigido no iPhone** (AGNUS-221): o `fetch`
+  do Expo (SDK 52+) não aceita a parte `{ uri, name, type }` do `FormData` do
+  React Native, e a requisição nem saía do aparelho; os bytes agora vêm do
+  `File` do `expo-file-system`. E o iPhone entrega as fotos em HEIC, que o
+  backend recusa: o seletor pede a versão compatível (JPEG), como o Safari faz.
+  Achado testando no simulador de iPhone.
 - **Aviso de peça adicionada e "sacola"** (AGNUS-224): ao adicionar, o aviso
   diz "Peça adicionada à sacola" com o nome, a cor e o tamanho, e tem o botão
   "Ver sacola", como o pop-up do site. Os textos do app trocam "carrinho" por

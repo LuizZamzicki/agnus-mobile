@@ -26,7 +26,6 @@ interface CartContextValue {
   addItem: (input: AddToCartInput) => Promise<void>;
   setQuantity: (itemId: number, quantidade: number) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
-  removeItems: (itemIds: number[]) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -124,16 +123,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [removeMutation],
   );
 
-  const removeItems = useCallback(
-    async (itemIds: number[]) => {
-      for (const id of itemIds) {
-        await removeCartItem(id);
-      }
-      await invalidateItems();
-    },
-    [invalidateItems],
-  );
-
   const { refetch: refetchCart } = cartQuery;
   const { refetch: refetchItems } = itemsQuery;
   const refetch = useCallback(() => {
@@ -153,7 +142,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addItem,
       setQuantity,
       removeItem,
-      removeItems,
     }),
     [
       cartId,
@@ -167,7 +155,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addItem,
       setQuantity,
       removeItem,
-      removeItems,
     ],
   );
 

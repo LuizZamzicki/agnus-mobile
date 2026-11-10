@@ -24,6 +24,12 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 - **Meus pedidos sem 403** (AGNUS-217): a lista passa a usar `GET /orders/me`
   (`GET /orders?id_usuario=` agora é só da equipe), e o detalhe busca status e
   total em `GET /orders/:id`, sem depender da lista.
+- **Checkout volta a funcionar** (AGNUS-218): uma única chamada
+  `POST /orders/checkout` com o endereço substitui `POST /orders` mais um
+  `POST /order-items` por item, que agora são só da equipe. O backend calcula o
+  total, cria o pedido e esvazia a sacola, ou desfaz tudo. O app mostra a
+  `message` dos erros 400, 404 e 409; sem resposta da rede, pede para conferir
+  Meus pedidos antes de tentar de novo.
 
 ### Reestruturação: Expo Router
 

@@ -109,6 +109,17 @@ eas build --profile preview --platform android
 
 Ajuste `EXPO_PUBLIC_API_URL` no perfil (`eas.json`) antes de buildar.
 
+## Visual
+
+Segue o `DESIGN.md` do composer ("Tempo Litúrgico"): pedra clara, tinta e, no
+tema claro, os botões principais na cor do tempo litúrgico do dia
+(`src/theme/liturgia.ts`, o mesmo cálculo do site). Estados de seleção ficam
+na tinta. O tema escuro usa a pedra escura do site.
+
+Ícone, ícone adaptativo do Android, monocromático, splash e favicon saem do logo
+simplificado (`docs/marca/agnus-logo-simplificado.png`) pelo
+`scripts/gerar-icones.py`, com o fundo `--ink` (`#1d1c1a`) dos ícones do site.
+
 ## Offline
 
 O cache do React Query é persistido no `AsyncStorage` (24h), então ao reabrir o

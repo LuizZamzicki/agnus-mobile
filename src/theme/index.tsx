@@ -1,7 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DarkTheme, DefaultTheme, type Theme as NavTheme } from "expo-router";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { StyleSheet, useColorScheme, type TextStyle } from "react-native";
+import { AppState, StyleSheet, useColorScheme, type TextStyle } from "react-native";
+
+import { tempoLiturgico, type TempoLiturgico } from "./liturgia";
 
 /* --------------------------------- Tokens ---------------------------------- */
 
@@ -28,43 +30,62 @@ export type ThemeColors = {
   border: string;
   text: string;
   textMuted: string;
+  /** Ação principal (botões, aviso): a cor do tempo litúrgico no claro, a tinta clara no escuro. */
   primary: string;
   primaryText: string;
+  /** Estado escolhido (tamanho, cor, filtro, categoria): sempre a tinta, como no site. */
+  selected: string;
+  selectedText: string;
+  /** Cor do tempo litúrgico do dia, para detalhes (filetes, ícones de destaque). */
+  lit: string;
+  /** Latão: estrelas das avaliações e selos. */
   accent: string;
   danger: string;
   success: string;
   overlay: string;
 };
 
-export const lightColors: ThemeColors = {
-  background: "#ffffff",
-  surface: "#f5f5f5",
-  surfaceAlt: "#f0f0f0",
-  border: "#e0dccf",
-  text: "#1f1f1f",
-  textMuted: "#6b6760",
-  primary: "#d4a739",
-  primaryText: "#1f1f1f",
-  accent: "#c99f59",
-  danger: "#c0392b",
-  success: "#2e7d32",
-  overlay: "rgba(0,0,0,0.4)",
-};
+/** Tokens do DESIGN.md ("Tempo Litúrgico"). A cor da ação vem do tempo do dia. */
+function makeLightColors(tempo: TempoLiturgico): ThemeColors {
+  return {
+    background: "#ecebe7", // --stone
+    surface: "#f7f6f3", // --paper
+    surfaceAlt: "#e2e0db", // --stone-2
+    border: "#cfccc5", // --line
+    text: "#1d1c1a", // --ink
+    textMuted: "#5e5a54", // --muted
+    primary: tempo.cor,
+    primaryText: "#ffffff",
+    selected: "#1d1c1a",
+    selectedText: "#f7f6f3",
+    lit: tempo.cor,
+    accent: "#8a6a1f", // --brass
+    danger: "#9b2c1f",
+    success: "#2f6a46",
+    overlay: "rgba(0,0,0,0.4)",
+  };
+}
 
-export const darkColors: ThemeColors = {
-  background: "#121214",
-  surface: "#1c1c20",
-  surfaceAlt: "#26262c",
-  border: "#34343c",
-  text: "#f1f1f4",
-  textMuted: "#9b9ba6",
-  primary: "#e3bd5c",
-  primaryText: "#1f1f1f",
-  accent: "#d3ac6a",
-  danger: "#e5534b",
-  success: "#4caf50",
-  overlay: "rgba(0,0,0,0.6)",
-};
+/** Pedra escura, nunca preto puro. A ação é a tinta clara; a cor do tempo fica nos detalhes. */
+function makeDarkColors(tempo: TempoLiturgico): ThemeColors {
+  return {
+    background: "#1b1a18",
+    surface: "#2a2926",
+    surfaceAlt: "#23221f",
+    border: "#4a4741",
+    text: "#ecebe7",
+    textMuted: "#a9a49b",
+    primary: "#ecebe7",
+    primaryText: "#1b1a18",
+    selected: "#ecebe7",
+    selectedText: "#1b1a18",
+    lit: tempo.corEscura,
+    accent: "#be8e1f",
+    danger: "#e9736d",
+    success: "#47a86d",
+    overlay: "rgba(0,0,0,0.6)",
+  };
+}
 
 export type Typography = {
   title: TextStyle;
@@ -92,23 +113,14 @@ export type Theme = {
   typography: Typography;
   spacing: typeof spacing;
   radius: typeof radius;
+  /** Tempo litúrgico do dia (nome e cores), o mesmo que o site mostra. */
+  tempo: TempoLiturgico;
 };
 
-const lightTheme: Theme = {
-  scheme: "light",
-  colors: lightColors,
-  typography: makeTypography(lightColors),
-  spacing,
-  radius,
-};
-
-const darkTheme: Theme = {
-  scheme: "dark",
-  colors: darkColors,
-  typography: makeTypography(darkColors),
-  spacing,
-  radius,
-};
+function makeTheme(scheme: ColorScheme, tempo: TempoLiturgico): Theme {
+  const colors = scheme === "dark" ? makeDarkColors(tempo) : makeLightColors(tempo);
+  return { scheme, colors, typography: makeTypography(colors), spacing, radius, tempo };
+}
 
 /* ------------------------------- Preferência ------------------------------- */
 
@@ -153,13 +165,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const scheme: ColorScheme =
     preference === "system" ? (system === "dark" ? "dark" : "light") : preference;
 
+  // A cor muda com o tempo litúrgico: recalcula quando o app volta ao primeiro plano.
+  const [tempo, setTempo] = useState(() => tempoLiturgico());
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") return;
+      const atual = tempoLiturgico();
+      setTempo((anterior) => (anterior.chave === atual.chave ? anterior : atual));
+    });
+    return () => sub.remove();
+  }, []);
+
   const value = useMemo<ThemeContextValue>(
     () => ({
-      theme: scheme === "dark" ? darkTheme : lightTheme,
+      theme: makeTheme(scheme, tempo),
       preference,
       setPreference,
     }),
-    [scheme, preference, setPreference],
+    [scheme, tempo, preference, setPreference],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

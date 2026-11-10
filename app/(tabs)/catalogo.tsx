@@ -85,7 +85,7 @@ export default function CatalogScreen() {
             <Ionicons
               name="options-outline"
               size={20}
-              color={sort ? colors.background : colors.text}
+              color={sort ? colors.selectedText : colors.text}
             />
           </Pressable>
         </View>
@@ -123,7 +123,7 @@ export default function CatalogScreen() {
                   <Text style={[styles.optionText, active ? styles.optionTextActive : null]}>
                     {option.label}
                   </Text>
-                  {active ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
+                  {active ? <Ionicons name="checkmark" size={18} color={colors.text} /> : null}
                 </Pressable>
               );
             })}
@@ -189,7 +189,7 @@ const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
     },
-    filterButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    filterButtonActive: { backgroundColor: colors.selected, borderColor: colors.selected },
     list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
     column: { gap: spacing.md },
     footer: { paddingVertical: spacing.lg },

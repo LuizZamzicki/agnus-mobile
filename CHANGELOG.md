@@ -60,6 +60,14 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   "sacola", o mesmo termo do site e das mensagens da API ("Sua sacola está
   vazia"); a aba ganha o ícone de sacola. A rota continua `/carrinho`, então o
   deep link `agnusapp://carrinho` não muda.
+- **Visual igual ao da loja** (AGNUS-223): tema com os tokens do `DESIGN.md`
+  (pedra, papel, tinta, latão) no lugar do dourado antigo. No tema claro, os
+  botões principais e o aviso vestem a cor do tempo litúrgico do dia
+  (`src/theme/liturgia.ts`, portado do site e conferido dia a dia de 2025 a
+  2030); estados de seleção ficam na tinta; o tema escuro usa a pedra escura do
+  site. Ícone, ícone adaptativo, monocromático, splash e favicon passam a ser o
+  Cordeiro do logo simplificado sobre `--ink` (`scripts/gerar-icones.py`). A
+  tela Aparência mostra o tempo litúrgico do dia.
 
 ### Reestruturação: Expo Router
 

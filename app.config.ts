@@ -22,7 +22,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: "./assets/android-icon-foreground.png",
       backgroundImage: "./assets/android-icon-background.png",
       monochromeImage: "./assets/android-icon-monochrome.png",
-      backgroundColor: "#E6F4FE",
+      // --ink do DESIGN.md, o mesmo fundo do favicon e dos ícones do site.
+      backgroundColor: "#1d1c1a",
     },
     predictiveBackGestureEnabled: false,
   },
@@ -50,7 +51,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         image: "./assets/splash-icon.png",
         imageWidth: 180,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        // Pedra clara (--stone) e pedra escura do tema escuro, como o fundo do site.
+        backgroundColor: "#ecebe7",
+        dark: { image: "./assets/splash-icon.png", backgroundColor: "#1b1a18" },
       },
     ],
   ],

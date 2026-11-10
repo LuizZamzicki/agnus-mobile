@@ -1,3 +1,5 @@
+import { File } from "expo-file-system";
+
 import type { ProductReview, ReviewPhoto } from "../types/product";
 
 import { request } from "../lib/api";
@@ -50,8 +52,16 @@ export function uploadReviewPhotos(reviewId: number, photos: LocalPhoto[]): Prom
   const form = new FormData();
   form.append("id_avaliacao_produto", String(reviewId));
   for (const photo of photos) {
-    // Formato de arquivo do FormData do React Native: { uri, name, type }.
-    form.append("files", photo as unknown as Blob);
+    // O fetch do Expo (SDK 52+) não aceita a parte { uri, name, type } do React Native:
+    // só Blob ou objetos com bytes(). Os bytes vêm do File do expo-file-system; o nome
+    // e o tipo vêm do seletor, porque o File não informa o tipo MIME e o backend só
+    // aceita imagem (image/jpeg, png, ...).
+    const part = {
+      name: photo.name,
+      type: photo.type,
+      bytes: () => new File(photo.uri).bytes(),
+    };
+    form.append("files", part as unknown as Blob);
   }
   return request<ReviewPhoto[]>("/product-review-photos", {
     method: "POST",

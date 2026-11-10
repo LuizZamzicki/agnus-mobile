@@ -78,6 +78,13 @@ export interface ProductReview {
   nota: string | number | null;
 }
 
+/** `GET /product-review-photos/:id_avaliacao` — `caminho_url` relativo (`avaliacao_fotos/...`). */
+export interface ReviewPhoto {
+  id_avaliacao_foto: number;
+  id_avaliacao_produto: number;
+  caminho_url: string;
+}
+
 /** `GET /categories` (paginado). */
 export interface Category {
   id_categoria: number;

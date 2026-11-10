@@ -37,6 +37,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-status-bar",
     "expo-web-browser",
     [
+      "expo-image-picker",
+      {
+        photosPermission: "O Agnus usa suas fotos para você mostrar a peça na avaliação.",
+        cameraPermission: false,
+        microphonePermission: false,
+      },
+    ],
+    [
       "expo-splash-screen",
       {
         image: "./assets/splash-icon.png",

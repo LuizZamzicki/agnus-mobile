@@ -1,7 +1,8 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -20,6 +21,7 @@ import { useTheme, useThemedStyles, type Theme } from "../../../../src/theme";
 export default function OrderDetailScreen() {
   const { colors, typography } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const router = useRouter();
   const { id_pedido: idParam } = useLocalSearchParams<{ id_pedido: string }>();
   const id_pedido = Number(idParam);
   const orderQuery = useOrder(id_pedido);
@@ -27,6 +29,8 @@ export default function OrderDetailScreen() {
   const items = useOrderItems(id_pedido);
 
   const order = orderQuery.data;
+  // Como no site: só o pedido entregue libera a avaliação das peças.
+  const entregue = order?.status === "entregue";
   const address = addresses.data?.find((a) => a.id_usuario_endereco === order?.id_usuario_endereco);
 
   return (
@@ -96,6 +100,21 @@ export default function OrderDetailScreen() {
                       {item.quantidade}× {item.produto?.nome ?? "Produto"}
                     </Text>
                     {variantes ? <Text style={typography.caption}>{variantes}</Text> : null}
+                    {entregue && item.produto?.id_produto ? (
+                      <Pressable
+                        onPress={() =>
+                          router.push({
+                            pathname: "/avaliar/[id_produto]",
+                            params: { id_produto: String(item.produto?.id_produto) },
+                          })
+                        }
+                        hitSlop={6}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Avaliar ${item.produto.nome}`}
+                      >
+                        <Text style={styles.reviewLink}>Avaliar peça</Text>
+                      </Pressable>
+                    ) : null}
                   </View>
                   <Text style={typography.body}>{formatarMoeda(subtotal)}</Text>
                 </View>
@@ -132,6 +151,7 @@ const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
     },
     itemRow: { flexDirection: "row", justifyContent: "space-between", gap: spacing.sm },
     itemInfo: { flex: 1, gap: 2 },
+    reviewLink: { color: colors.text, fontWeight: "600", fontSize: 13, marginTop: 2 },
     totalRow: {
       flexDirection: "row",
       justifyContent: "space-between",

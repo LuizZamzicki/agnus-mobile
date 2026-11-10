@@ -41,6 +41,13 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 - **Fotos nas avaliações** (AGNUS-222): cada avaliação da tela do produto mostra
   as fotos de `GET /product-review-photos/:id` em miniaturas; tocar abre a foto
   em tela cheia.
+- **Avaliar peças pelo app, com fotos** (AGNUS-221): botão "Escrever
+  avaliação" na tela do produto e "Avaliar peça" no detalhe do pedido entregue,
+  só para quem recebeu a peça (`GET /orders/me?status=entregue`, mesma regra
+  da API). Formulário com nota de meia em meia estrela, nome e comentário, e até
+  4 fotos da galeria (`expo-image-picker`, roda no Expo Go) enviadas em
+  multipart. Quem já avaliou pode alterar ou excluir. Se o texto salvar e as
+  fotos falharem, o app avisa e volta, sem duplicar a avaliação.
 
 ### Reestruturação: Expo Router
 

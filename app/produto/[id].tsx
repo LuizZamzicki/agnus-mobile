@@ -16,6 +16,7 @@ import { SizePicker } from "../../src/components/produtos/SizePicker";
 import { useToast } from "../../src/components/layout/Toast";
 import { useAuth } from "../../src/contexts/AuthContext";
 import { useCart } from "../../src/contexts/CartContext";
+import { useCanReview } from "../../src/hooks/avaliacoes";
 import { useCategories } from "../../src/hooks/categorias";
 import { useProductBundle, useRelatedProducts } from "../../src/hooks/produtos";
 import { ApiError } from "../../src/lib/api";
@@ -144,7 +145,7 @@ export default function ProductScreen() {
             <SizePicker grades={grades} selectedId={grade?.id_produto_grade} onSelect={setGrade} />
           ) : null}
 
-          <ReviewsSection reviews={avaliacoes} average={media} />
+          <ReviewsSection productId={produto.id_produto} reviews={avaliacoes} average={media} />
 
           {related.items.length > 0 ? (
             <View style={styles.related}>
@@ -188,14 +189,43 @@ export default function ProductScreen() {
   );
 }
 
-function ReviewsSection({ reviews, average }: { reviews: ProductReview[]; average: number }) {
+function ReviewsSection({
+  productId,
+  reviews,
+  average,
+}: {
+  productId: number;
+  reviews: ProductReview[];
+  average: number;
+}) {
   const { typography } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const router = useRouter();
+  const { user } = useAuth();
+  const canReview = useCanReview(productId);
+  const minhaAvaliacao = reviews.find((r) => Number(r.id_usuario) === user?.id_usuario);
+
+  // Só quem recebeu a peça avalia (a API confere de novo); quem já avaliou pode alterar.
+  const reviewButton =
+    user && (minhaAvaliacao || canReview.data === true) ? (
+      <Button
+        title={minhaAvaliacao ? "Alterar sua avaliação" : "Escrever avaliação"}
+        variant="secondary"
+        onPress={() =>
+          router.push({
+            pathname: "/avaliar/[id_produto]",
+            params: { id_produto: String(productId) },
+          })
+        }
+      />
+    ) : null;
+
   if (reviews.length === 0) {
     return (
       <View style={styles.reviews}>
         <Text style={typography.heading}>Avaliações</Text>
         <Text style={styles.reviewEmpty}>Este produto ainda não tem avaliações.</Text>
+        {reviewButton}
       </View>
     );
   }
@@ -206,6 +236,7 @@ function ReviewsSection({ reviews, average }: { reviews: ProductReview[]; averag
         <Text style={typography.heading}>Avaliações</Text>
         <Rating value={average} count={reviews.length} size={14} />
       </View>
+      {reviewButton}
       {reviews.map((review) => (
         <View key={review.id_avaliacao_produto} style={styles.review}>
           <Rating value={numeroSeguro(review.nota, 0)} size={13} showValue={false} />

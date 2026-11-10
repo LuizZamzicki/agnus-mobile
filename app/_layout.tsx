@@ -62,6 +62,10 @@ function RootStack() {
           <Stack.Screen name="login" options={{ title: "Entrar", presentation: "modal" }} />
           <Stack.Screen name="checkout" options={{ title: "Finalizar compra" }} />
           <Stack.Screen
+            name="avaliar/[id_produto]"
+            options={{ title: "Avaliar peça", presentation: "modal" }}
+          />
+          <Stack.Screen
             name="pedido/[id_pedido]"
             options={{
               title: "Pedido confirmado",

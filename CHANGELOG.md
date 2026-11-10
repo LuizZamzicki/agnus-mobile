@@ -33,6 +33,11 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 - **Carrinho compra a sacola inteira** (AGNUS-219): sai a seleção de itens,
   porque o `/orders/checkout` compra a sacola toda, como no site. Quem não quer
   uma peça, remove. O componente `Checkbox`, que só o carrinho usava, sai junto.
+- **Notificações** (AGNUS-220): sino com o total de não lidas no cabeçalho das
+  abas e da Conta, e a tela Conta → Notificações com as não lidas
+  (`GET /notifications/me`). Atualiza a cada minuto e ao voltar para o app.
+  Tocar numa notificação marca como lida e abre o pedido; "Marcar todas" usa
+  `PATCH /notifications/read-all`. Ícones por status, iguais aos do site.
 
 ### Reestruturação: Expo Router
 

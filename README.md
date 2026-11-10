@@ -149,6 +149,7 @@ app/
       enderecos/
       contatos/
       pedidos/
+      notificacoes.tsx
       aparencia.tsx
 
 src/
@@ -157,7 +158,8 @@ src/
   contexts/    AuthContext, CartContext, errors
   lib/         api.ts (cliente fetch), secureStorage.ts (JWT), env, format, cpf, ...
   query/       QueryClient
-  hooks/       produtos/, categorias/, enderecos/, contatos/, pedidos/, localidades/
+  hooks/       produtos/, categorias/, enderecos/, contatos/, pedidos/, notificacoes/,
+               localidades/
   components/  kit de UI genérico (Button, EmptyState, ...) + subpastas por feature
                (produtos/, carrinho/, conta/, layout/, auth/)
   theme/       cores, spacing, tipografia

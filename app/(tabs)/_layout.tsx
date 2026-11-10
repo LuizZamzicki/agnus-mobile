@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 
+import { NotificationBell } from "../../src/components/notificacoes/NotificationBell";
 import { useCart } from "../../src/contexts/CartContext";
 import { useTheme } from "../../src/theme";
 
@@ -20,6 +21,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: true,
+        headerRight: () => <NotificationBell />,
         tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarIcon: ({ color, size }) => (

@@ -7,6 +7,7 @@ import { EmptyState } from "../../../src/components/EmptyState";
 import { MenuRow } from "../../../src/components/conta/MenuRow";
 import { Screen } from "../../../src/components/layout/Screen";
 import { useAuth } from "../../../src/contexts/AuthContext";
+import { useNotifications } from "../../../src/hooks/notificacoes";
 import { formatarCPF } from "../../../src/lib/cpf";
 import { useTheme, useThemedStyles, type Theme } from "../../../src/theme";
 
@@ -15,6 +16,7 @@ export default function AccountHomeScreen() {
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { user, isAuthenticated, signOut } = useAuth();
+  const naoLidas = useNotifications().data?.naoLidas ?? 0;
 
   if (!isAuthenticated || !user) {
     return (
@@ -65,6 +67,16 @@ export default function AccountHomeScreen() {
           icon="receipt-outline"
           label="Meus pedidos"
           onPress={() => router.push("/conta/pedidos")}
+        />
+        <MenuRow
+          icon="notifications-outline"
+          label="Notificações"
+          description={
+            naoLidas > 0
+              ? `${naoLidas} ${naoLidas === 1 ? "não lida" : "não lidas"}`
+              : "Mudanças no status dos pedidos"
+          }
+          onPress={() => router.push("/conta/notificacoes")}
         />
         <MenuRow
           icon="contrast-outline"

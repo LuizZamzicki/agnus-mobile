@@ -135,6 +135,7 @@ app/
   produto/[id].tsx
   login.tsx
   checkout.tsx
+  avaliar/[id_produto].tsx  avaliar (ou alterar) a peça, com fotos
   pedido/[id_pedido].tsx
   (tabs)/
     _layout.tsx           <Tabs>
@@ -158,7 +159,7 @@ src/
   contexts/    AuthContext, CartContext, errors
   lib/         api.ts (cliente fetch), secureStorage.ts (JWT), env, format, cpf, ...
   query/       QueryClient
-  hooks/       produtos/, categorias/, enderecos/, contatos/, pedidos/, notificacoes/,
+  hooks/       produtos/, categorias/, enderecos/, contatos/, pedidos/, notificacoes/, avaliacoes/,
                localidades/
   components/  kit de UI genérico (Button, EmptyState, ...) + subpastas por feature
                (produtos/, carrinho/, conta/, layout/, auth/)

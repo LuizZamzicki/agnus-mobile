@@ -64,8 +64,18 @@ function messageFromBody(body: unknown, fallback: string): string {
       if (typeof record[key] === "string" && record[key]) return record[key] as string;
     }
   }
-  if (typeof body === "string" && body) return body;
+  // Páginas de erro do gateway (nginx) chegam em HTML: não servem como mensagem.
+  if (typeof body === "string" && body && !body.trimStart().startsWith("<")) return body;
   return fallback;
+}
+
+/** Mensagem padrão quando a resposta de erro não traz uma `message` legível. */
+function fallbackMessage(status: number): string {
+  if (status === 429) return "Muitas tentativas. Aguarde um minuto e tente novamente.";
+  if (status === 502 || status === 503 || status === 504) {
+    return "O serviço está indisponível agora. Tente de novo em instantes.";
+  }
+  return `Erro ${status}`;
 }
 
 /**
@@ -115,7 +125,7 @@ export async function request<T = unknown>(path: string, opts: RequestOptions = 
 
   const parsed = await parseBody(res);
   if (!res.ok) {
-    throw new ApiError(res.status, messageFromBody(parsed, `Erro ${res.status}`), parsed);
+    throw new ApiError(res.status, messageFromBody(parsed, fallbackMessage(res.status)), parsed);
   }
   return parsed as T;
 }

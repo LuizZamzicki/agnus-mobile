@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getOrderItems, getUserOrders } from "../../actions/orders";
+import { getMyOrders, getOrder, getOrderItems } from "../../actions/orders";
 import { useAuth } from "../../contexts/AuthContext";
 
 function useUserId() {
@@ -12,8 +12,17 @@ export function useOrders() {
   const userId = useUserId();
   return useQuery({
     queryKey: ["orders", userId],
-    queryFn: () => getUserOrders(userId),
+    queryFn: () => getMyOrders(),
     enabled: userId > 0,
+  });
+}
+
+export function useOrder(orderId: number) {
+  const userId = useUserId();
+  return useQuery({
+    queryKey: ["order", userId, orderId],
+    queryFn: () => getOrder(orderId),
+    enabled: userId > 0 && orderId > 0,
   });
 }
 

@@ -101,15 +101,16 @@ export default function ProductScreen() {
         id_produto_grade: grade.id_produto_grade,
         quantidade: 1,
       });
+      // Como o pop-up do site: confirma a peça, a cor e o tamanho escolhidos.
       toast.show({
-        title: produto.nome,
-        message: "Adicionado ao carrinho",
-        actionLabel: "Ver carrinho",
+        title: "Peça adicionada à sacola",
+        message: `${produto.nome} · Cor: ${color.nome} · Tamanho: ${grade.nome}`,
+        actionLabel: "Ver sacola",
         onAction: () => router.push("/carrinho"),
       });
     } catch (err) {
       toast.show({
-        message: err instanceof ApiError ? err.message : "Não foi possível adicionar ao carrinho.",
+        message: err instanceof ApiError ? err.message : "Não foi possível adicionar à sacola.",
         tone: "error",
       });
     } finally {
@@ -179,7 +180,7 @@ export default function ProductScreen() {
           </Text>
         ) : null}
         <Button
-          title={isAuthenticated ? "Adicionar ao carrinho" : "Entrar para comprar"}
+          title={isAuthenticated ? "Adicionar à sacola" : "Entrar para comprar"}
           onPress={onAddToCart}
           loading={adding}
           disabled={!buyable || needsColor || needsGrade}

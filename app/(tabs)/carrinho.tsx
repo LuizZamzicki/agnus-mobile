@@ -33,7 +33,7 @@ export default function CartScreen() {
     return (
       <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <EmptyState
-          title="Seu carrinho espera por você"
+          title="Sua sacola espera por você"
           message="Entre para adicionar produtos e finalizar a compra."
           actionLabel="Entrar ou cadastrar"
           onAction={() => router.push("/login")}
@@ -72,10 +72,10 @@ export default function CartScreen() {
         )}
         ListEmptyComponent={
           cart.isLoading ? (
-            <EmptyState title="Carregando carrinho" loading />
+            <EmptyState title="Carregando sacola" loading />
           ) : (
             <EmptyState
-              title="Carrinho vazio"
+              title="Sua sacola está vazia"
               message="Explore o catálogo e adicione produtos."
               actionLabel="Ir ao catálogo"
               onAction={() => router.push("/catalogo")}
@@ -102,8 +102,8 @@ export default function CartScreen() {
 
       <ConfirmDialog
         visible={toRemove !== null}
-        title="Remover item?"
-        message="Ele sai do seu carrinho."
+        title="Remover peça?"
+        message="Ela sai da sua sacola."
         confirmLabel="Remover"
         destructive
         loading={cart.isMutating}

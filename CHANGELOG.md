@@ -48,6 +48,12 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   4 fotos da galeria (`expo-image-picker`, roda no Expo Go) enviadas em
   multipart. Quem já avaliou pode alterar ou excluir. Se o texto salvar e as
   fotos falharem, o app avisa e volta, sem duplicar a avaliação.
+- **Aviso de peça adicionada e "sacola"** (AGNUS-224): ao adicionar, o aviso
+  diz "Peça adicionada à sacola" com o nome, a cor e o tamanho, e tem o botão
+  "Ver sacola", como o pop-up do site. Os textos do app trocam "carrinho" por
+  "sacola", o mesmo termo do site e das mensagens da API ("Sua sacola está
+  vazia"); a aba ganha o ícone de sacola. A rota continua `/carrinho`, então o
+  deep link `agnusapp://carrinho` não muda.
 
 ### Reestruturação: Expo Router
 

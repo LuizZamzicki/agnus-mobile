@@ -111,7 +111,7 @@ export default function CheckoutScreen() {
         <EmptyState
           title="Sua sacola está vazia"
           message="Adicione peças à sacola para finalizar a compra."
-          actionLabel="Voltar ao carrinho"
+          actionLabel="Voltar à sacola"
           onAction={() => router.back()}
         />
       </SafeAreaView>

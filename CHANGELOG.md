@@ -5,6 +5,15 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
 
 ## [Não lançado]
 
+### Backend de microsserviços (EP-10)
+
+- **SDK 57 alinhado** (AGNUS-213): `react-dom` 19.2.3 declarado e pacotes `expo-*`
+  atualizados; o `npm ci` do CI volta a passar.
+- **API pelo gateway** (AGNUS-214): `EXPO_PUBLIC_API_URL` passa a ser
+  `https://<host>/api`, ou a raiz do domínio do ngrok no desenvolvimento. Não
+  existe mais a porta 3000 do `agnus-back`. O app manda
+  `ngrok-skip-browser-warning` para domínios do ngrok.
+
 ### Reestruturação: Expo Router
 
 - **Navegação migrada de React Navigation para `expo-router`** (roteamento por

@@ -1,5 +1,5 @@
 import { getTokenSync } from "./secureStorage";
-import { API_URL } from "./env";
+import { API_EXTRA_HEADERS, API_URL } from "./env";
 
 export class ApiError extends Error {
   status: number;
@@ -79,6 +79,7 @@ export async function request<T = unknown>(path: string, opts: RequestOptions = 
   const { body, query, skipAuth, timeoutMs = 20_000, headers, ...rest } = opts;
 
   const finalHeaders = new Headers(headers as HeadersInit | undefined);
+  for (const [name, value] of Object.entries(API_EXTRA_HEADERS)) finalHeaders.set(name, value);
   const token = skipAuth ? null : getTokenSync();
   if (token) finalHeaders.set("Authorization", `Bearer ${token}`);
 

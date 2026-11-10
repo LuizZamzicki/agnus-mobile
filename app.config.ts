@@ -1,6 +1,6 @@
 import type { ExpoConfig, ConfigContext } from "expo/config";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://localhost/api";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,

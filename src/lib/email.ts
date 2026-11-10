@@ -1,4 +1,4 @@
-// Mesma regra do back (`agnus-back/src/utils/userValidation.ts`).
+// Mesma regra do back (`services/identidade/src/utils/userValidation.ts`).
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function emailValido(email: string): boolean {

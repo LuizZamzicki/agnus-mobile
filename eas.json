@@ -5,10 +5,7 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal",
@@ -16,13 +13,13 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.agnus.com"
+        "EXPO_PUBLIC_API_URL": "https://api.agnus.com/api"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.agnus.com"
+        "EXPO_PUBLIC_API_URL": "https://api.agnus.com/api"
       }
     }
   },

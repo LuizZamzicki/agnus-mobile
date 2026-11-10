@@ -58,7 +58,7 @@ const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
       borderWidth: 2,
       borderColor: "transparent",
     },
-    swatchWrapActive: { borderColor: colors.primary },
+    swatchWrapActive: { borderColor: colors.selected },
     swatch: {
       width: 34,
       height: 34,

@@ -56,7 +56,7 @@ const makeStyles = ({ colors, spacing, radius }: Theme) =>
       borderColor: colors.border,
       backgroundColor: colors.surface,
     },
-    chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    chipActive: { backgroundColor: colors.selected, borderColor: colors.selected },
     chipText: { fontSize: 13, color: colors.text },
-    chipTextActive: { color: colors.primaryText, fontWeight: "600" },
+    chipTextActive: { color: colors.selectedText, fontWeight: "600" },
   });

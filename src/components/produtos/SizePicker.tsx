@@ -57,8 +57,8 @@ const makeStyles = ({ colors, spacing, radius }: Theme) =>
       backgroundColor: colors.surface,
       alignItems: "center",
     },
-    pillActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    pillActive: { backgroundColor: colors.selected, borderColor: colors.selected },
     label: { fontSize: 14, color: colors.text, fontWeight: "600" },
-    labelActive: { color: colors.primaryText },
+    labelActive: { color: colors.selectedText },
     extra: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   });

@@ -258,7 +258,7 @@ const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
       borderColor: colors.border,
       backgroundColor: colors.surface,
     },
-    addressCardActive: { borderColor: colors.primary, backgroundColor: colors.background },
+    addressCardActive: { borderColor: colors.selected, backgroundColor: colors.background },
     radio: {
       width: 20,
       height: 20,
@@ -268,8 +268,8 @@ const makeStyles = ({ colors, typography, spacing, radius }: Theme) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    radioActive: { borderColor: colors.primary },
-    radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
+    radioActive: { borderColor: colors.selected },
+    radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.selected },
     addressText: { flex: 1, gap: 2 },
     addressLine1: { ...typography.body, fontWeight: "600" },
     badge: {

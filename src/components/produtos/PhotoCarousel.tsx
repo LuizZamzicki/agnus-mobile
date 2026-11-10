@@ -74,5 +74,5 @@ const makeStyles = ({ colors }: Theme) =>
       borderRadius: 3,
       backgroundColor: "rgba(0,0,0,0.25)",
     },
-    dotActive: { backgroundColor: colors.primary, width: 18 },
+    dotActive: { backgroundColor: colors.selected, width: 18 },
   });

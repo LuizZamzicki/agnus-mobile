@@ -1,4 +1,5 @@
 import { makeRedirectUri } from "expo-auth-session";
+import * as Crypto from "expo-crypto";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -99,7 +100,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     const redirectUri = makeRedirectUri({ scheme: "agnusapp", path: "auth" });
-    const authUrl = `${API_URL}/auth/google?redirect=${encodeURIComponent(redirectUri)}`;
+    // O backend devolve o nonce junto com o token. Sem conferir, qualquer link
+    // `agnusapp://auth?token=...` aberto no aparelho entraria com a sessão de
+    // outra pessoa (login forjado). Mesmo controle do login.jsx do site.
+    const nonce = Crypto.randomUUID();
+    const authUrl =
+      `${API_URL}/auth/google?redirect=${encodeURIComponent(redirectUri)}` +
+      `&nonce=${encodeURIComponent(nonce)}`;
 
     const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
     if (result.type !== "success") throw new GoogleSignInCancelledError();
@@ -110,6 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const token = firstParam(queryParams?.token);
     if (!token) throw new GoogleSignInCancelledError();
+    if (firstParam(queryParams?.nonce) !== nonce) {
+      throw new ApiError(400, "Não foi possível confirmar o login com Google. Tente novamente.");
+    }
 
     await saveToken(token);
     try {

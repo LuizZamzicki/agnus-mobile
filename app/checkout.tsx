@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createUserAddress, getUserAddresses } from "../src/actions/account";
-import { createOrder, createOrderItem } from "../src/actions/orders";
+import { checkout } from "../src/actions/orders";
 import { AddressForm } from "../src/components/conta/AddressForm";
 import { Button } from "../src/components/Button";
 import { EmptyState } from "../src/components/EmptyState";
@@ -18,18 +18,11 @@ import { formatarMoeda, numeroSeguro } from "../src/lib/format";
 import { useTheme, useThemedStyles, type Theme } from "../src/theme";
 import type { AddressInput, UserAddress } from "../src/types/account";
 
-function toItemIds(value: string | string[] | undefined): number[] {
-  if (!value) return [];
-  const arr = Array.isArray(value) ? value : [value];
-  return arr.map((v) => Number(v)).filter((n) => Number.isFinite(n));
-}
-
 export default function CheckoutScreen() {
   const { colors, typography } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
-  const { itemIds: itemIdsParam } = useLocalSearchParams<{ itemIds: string | string[] }>();
-  const itemIds = useMemo(() => toItemIds(itemIdsParam), [itemIdsParam]);
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const userId = user?.id_usuario ?? 0;
   const cart = useCart();
@@ -40,10 +33,8 @@ export default function CheckoutScreen() {
     refetchCart();
   }, [refetchCart]);
 
-  const items = useMemo(
-    () => cart.items.filter((item) => itemIds.includes(item.id_carrinho_item)),
-    [cart.items, itemIds],
-  );
+  // O checkout compra a sacola inteira; o total final é calculado no servidor.
+  const items = cart.items;
   const total = items.reduce(
     (sum, item) =>
       sum + numeroSeguro(item.subtotal, numeroSeguro(item.preco_unitario, 0) * item.quantidade),
@@ -89,36 +80,27 @@ export default function CheckoutScreen() {
     setError(null);
     setPlacing(true);
     try {
-      const order = await createOrder({
-        id_usuario: userId,
-        id_usuario_endereco: selectedAddressId,
-        valor_total: Number(total.toFixed(2)),
-      });
-      // Sequencial e não-transacional: se um item falhar, o carrinho é preservado.
-      for (const item of items) {
-        await createOrderItem({
-          id_pedido: order.id_pedido,
-          id_produto_cor: item.id_produto_cor,
-          id_produto_grade: item.id_produto_grade,
-          quantidade: item.quantidade,
-        });
-      }
-      // Pedido criado. A limpeza do carrinho é best-effort: não pode reprovar a compra.
-      try {
-        await cart.removeItems(items.map((item) => item.id_carrinho_item));
-      } catch {
-        cart.refetch();
-      }
+      // Uma chamada só: o backend cria o pedido e esvazia a sacola, ou desfaz tudo.
+      const order = await checkout(selectedAddressId);
+      queryClient.invalidateQueries({ queryKey: ["cart-items"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
       router.replace({
         pathname: "/pedido/[id_pedido]",
         params: { id_pedido: String(order.id_pedido) },
       });
     } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? `Não foi possível concluir o pedido: ${err.message}. Seu carrinho foi mantido.`
-          : "Não foi possível concluir o pedido. Seu carrinho foi mantido.",
-      );
+      // 409: uma peça ficou indisponível ou a sacola mudou. Recarrega para mostrar o estado atual.
+      if (err instanceof ApiError && err.status === 409) cart.refetch();
+      if (err instanceof ApiError && err.status > 0) {
+        setError(err.message);
+      } else {
+        // Sem resposta (rede/timeout): o pedido pode ter sido criado mesmo assim.
+        queryClient.invalidateQueries({ queryKey: ["orders"] });
+        cart.refetch();
+        setError(
+          "Não foi possível confirmar o pedido. Confira em Conta → Meus pedidos antes de tentar de novo.",
+        );
+      }
       setPlacing(false);
     }
   };
@@ -127,8 +109,8 @@ export default function CheckoutScreen() {
     return (
       <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
         <EmptyState
-          title="Nada para finalizar"
-          message="Volte ao carrinho e selecione os itens da compra."
+          title="Sua sacola está vazia"
+          message="Adicione peças à sacola para finalizar a compra."
           actionLabel="Voltar ao carrinho"
           onAction={() => router.back()}
         />

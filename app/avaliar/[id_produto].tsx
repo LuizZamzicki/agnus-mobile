@@ -151,6 +151,10 @@ function ReviewForm({
       allowsMultipleSelection: true,
       selectionLimit: vagas,
       quality: 0.8,
+      // O iPhone guarda as fotos em HEIC, que o backend recusa (só JPEG, PNG, GIF, WEBP e
+      // BMP). "Compatible" pede ao iOS a versão mais compatível: JPEG, como o Safari faz.
+      preferredAssetRepresentationMode:
+        ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
     });
     if (resultado.canceled) return;
     const novas = resultado.assets.slice(0, vagas).map(fotoLocal);

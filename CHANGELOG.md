@@ -13,6 +13,10 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   `https://<host>/api`, ou a raiz do domínio do ngrok no desenvolvimento. Não
   existe mais a porta 3000 do `agnus-back`. O app manda
   `ngrok-skip-browser-warning` para domínios do ngrok.
+- **Aviso de limite de tentativas** (AGNUS-215): o 429 do gateway vem em HTML e
+  aparecia como mensagem de erro. Agora o app ignora corpo HTML e mostra
+  "Muitas tentativas. Aguarde um minuto e tente novamente."; 502, 503 e 504
+  viram "O serviço está indisponível agora".
 
 ### Reestruturação: Expo Router
 

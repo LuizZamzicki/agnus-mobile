@@ -8,26 +8,16 @@ import { normalizarUrlImagem } from "../../lib/produtos";
 import { useTheme, useThemedStyles, type Theme } from "../../theme";
 import type { CartItem } from "../../types/cart";
 
-import { Checkbox } from "../Checkbox";
 import { QtyStepper } from "../QtyStepper";
 
 interface CartItemRowProps {
   item: CartItem;
-  selected: boolean;
   disabled?: boolean;
-  onToggleSelected: () => void;
   onChangeQuantity: (quantidade: number) => void;
   onRemove: () => void;
 }
 
-export function CartItemRow({
-  item,
-  selected,
-  disabled,
-  onToggleSelected,
-  onChangeQuantity,
-  onRemove,
-}: CartItemRowProps) {
+export function CartItemRow({ item, disabled, onChangeQuantity, onRemove }: CartItemRowProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const uri = normalizarUrlImagem(item.foto_produto ?? item.produto?.foto ?? "");
@@ -38,8 +28,6 @@ export function CartItemRow({
 
   return (
     <View style={styles.row}>
-      <Checkbox checked={selected} onToggle={onToggleSelected} label={`Selecionar ${nome}`} />
-
       <View style={styles.imageWrap}>
         {uri ? (
           <Image style={styles.image} source={{ uri }} contentFit="cover" transition={120} />

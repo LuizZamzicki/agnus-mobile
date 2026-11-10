@@ -30,6 +30,9 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   total, cria o pedido e esvazia a sacola, ou desfaz tudo. O app mostra a
   `message` dos erros 400, 404 e 409; sem resposta da rede, pede para conferir
   Meus pedidos antes de tentar de novo.
+- **Carrinho compra a sacola inteira** (AGNUS-219): sai a seleção de itens,
+  porque o `/orders/checkout` compra a sacola toda, como no site. Quem não quer
+  uma peça, remove. O componente `Checkbox`, que só o carrinho usava, sai junto.
 
 ### Reestruturação: Expo Router
 

@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -20,17 +20,10 @@ export default function CartScreen() {
   const { isAuthenticated } = useAuth();
   const cart = useCart();
 
-  const [selected, setSelected] = useState<Record<number, boolean>>({});
   const [toRemove, setToRemove] = useState<number | null>(null);
 
-  const isSelected = (id: number) => selected[id] ?? true;
-  const toggle = (id: number) => setSelected((prev) => ({ ...prev, [id]: !(prev[id] ?? true) }));
-
-  const selectedItems = useMemo(
-    () => cart.items.filter((item) => selected[item.id_carrinho_item] ?? true),
-    [cart.items, selected],
-  );
-  const subtotal = selectedItems.reduce(
+  // O checkout compra a sacola inteira, como no site: quem não quer uma peça, remove.
+  const subtotal = cart.items.reduce(
     (total, item) =>
       total + numeroSeguro(item.subtotal, numeroSeguro(item.preco_unitario, 0) * item.quantidade),
     0,
@@ -72,9 +65,7 @@ export default function CartScreen() {
         renderItem={({ item }) => (
           <CartItemRow
             item={item}
-            selected={isSelected(item.id_carrinho_item)}
             disabled={cart.isMutating}
-            onToggleSelected={() => toggle(item.id_carrinho_item)}
             onChangeQuantity={(qty) => cart.setQuantity(item.id_carrinho_item, qty)}
             onRemove={() => setToRemove(item.id_carrinho_item)}
           />
@@ -97,19 +88,14 @@ export default function CartScreen() {
         <View style={styles.footer}>
           <View style={styles.summaryRow}>
             <Text style={typography.body}>
-              Subtotal ({selectedItems.length} {selectedItems.length === 1 ? "item" : "itens"})
+              Subtotal ({cart.count} {cart.count === 1 ? "peça" : "peças"})
             </Text>
             <Text style={typography.price}>{formatarMoeda(subtotal)}</Text>
           </View>
           <Button
             title="Finalizar compra"
-            onPress={() =>
-              router.push({
-                pathname: "/checkout",
-                params: { itemIds: selectedItems.map((item) => String(item.id_carrinho_item)) },
-              })
-            }
-            disabled={selectedItems.length === 0 || cart.isMutating}
+            onPress={() => router.push("/checkout")}
+            disabled={cart.isMutating}
           />
         </View>
       ) : null}

@@ -21,6 +21,9 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   (`expo-crypto`), manda em `/auth/google` e só aceita o token se o mesmo valor
   voltar. É uma defesa a mais contra um retorno trocado durante o fluxo (login
   forjado com a sessão de outra pessoa), igual ao site.
+- **Meus pedidos sem 403** (AGNUS-217): a lista passa a usar `GET /orders/me`
+  (`GET /orders?id_usuario=` agora é só da equipe), e o detalhe busca status e
+  total em `GET /orders/:id`, sem depender da lista.
 
 ### Reestruturação: Expo Router
 

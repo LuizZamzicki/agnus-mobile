@@ -13,7 +13,7 @@ import { EmptyState } from "../../../../src/components/EmptyState";
 import { ErrorState } from "../../../../src/components/ErrorState";
 import { StatusBadge } from "../../../../src/components/StatusBadge";
 import { useAddresses } from "../../../../src/hooks/enderecos";
-import { useOrderItems, useOrders } from "../../../../src/hooks/pedidos";
+import { useOrder, useOrderItems } from "../../../../src/hooks/pedidos";
 import { formatarData, formatarMoeda, numeroSeguro } from "../../../../src/lib/format";
 import { useTheme, useThemedStyles, type Theme } from "../../../../src/theme";
 
@@ -22,11 +22,11 @@ export default function OrderDetailScreen() {
   const styles = useThemedStyles(makeStyles);
   const { id_pedido: idParam } = useLocalSearchParams<{ id_pedido: string }>();
   const id_pedido = Number(idParam);
-  const orders = useOrders();
+  const orderQuery = useOrder(id_pedido);
   const addresses = useAddresses();
   const items = useOrderItems(id_pedido);
 
-  const order = orders.data?.find((o) => o.id_pedido === id_pedido);
+  const order = orderQuery.data;
   const address = addresses.data?.find((a) => a.id_usuario_endereco === order?.id_usuario_endereco);
 
   return (
@@ -35,10 +35,10 @@ export default function OrderDetailScreen() {
       contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
-          refreshing={items.isRefetching || orders.isRefetching}
+          refreshing={items.isRefetching || orderQuery.isRefetching}
           onRefresh={() => {
             items.refetch();
-            orders.refetch();
+            orderQuery.refetch();
           }}
         />
       }

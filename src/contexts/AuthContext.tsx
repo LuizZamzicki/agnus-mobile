@@ -100,9 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     const redirectUri = makeRedirectUri({ scheme: "agnusapp", path: "auth" });
-    // O backend devolve o nonce junto com o token. Sem conferir, qualquer link
-    // `agnusapp://auth?token=...` aberto no aparelho entraria com a sessão de
-    // outra pessoa (login forjado). Mesmo controle do login.jsx do site.
+    // O backend devolve o nonce junto com o token. Conferir garante que o
+    // retorno é deste fluxo, e não um `agnusapp://auth?token=...` trocado no
+    // meio do caminho (login forjado). Mesmo controle do login.jsx do site.
     const nonce = Crypto.randomUUID();
     const authUrl =
       `${API_URL}/auth/google?redirect=${encodeURIComponent(redirectUri)}` +

@@ -82,8 +82,7 @@ Como funciona: o app abre `GET {API}/auth/google?redirect=<url-do-app>` no
 navegador; o backend faz o OAuth com o Google (usando o client Web dele) e, no
 callback, redireciona pra `<url-do-app>?token=…`. O app lê o `token` e hidrata a
 sessão com `/auth/me`. O app também manda um `nonce` e só aceita o token se o
-mesmo `nonce` voltar, contra login forjado por um link `agnusapp://` aberto de
-fora.
+mesmo `nonce` voltar, contra um retorno trocado durante o fluxo (login forjado).
 
 Requisitos no **serviço de identidade** (`services/identidade` do composer):
 

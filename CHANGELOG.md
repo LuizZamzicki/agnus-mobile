@@ -19,8 +19,8 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   viram "O serviço está indisponível agora".
 - **Login com Google confere o `nonce`** (AGNUS-216): o app gera um `nonce`
   (`expo-crypto`), manda em `/auth/google` e só aceita o token se o mesmo valor
-  voltar. Sem isso, um link `agnusapp://auth?token=...` forjado entraria com a
-  sessão de outra pessoa.
+  voltar. É uma defesa a mais contra um retorno trocado durante o fluxo (login
+  forjado com a sessão de outra pessoa), igual ao site.
 
 ### Reestruturação: Expo Router
 

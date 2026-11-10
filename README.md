@@ -1,7 +1,8 @@
 # agnus-mobile
 
 App mobile (Expo + React Native + TypeScript) da **área do cliente** do Agnus.
-Consome a API existente (`agnus-composer/agnus-back`) por HTTP. Sem nada do painel `/admin`.
+Consome a API do Agnus pelo gateway (nginx) dos microsserviços do `agnus-composer`.
+Sem nada do painel administrativo.
 
 > 🚧 Entregue em PRs por fase. Ver `CHANGELOG.md`.
 
@@ -25,10 +26,13 @@ Consome a API existente (`agnus-composer/agnus-back`) por HTTP. Sem nada do pain
 ## Subir a API local
 
 ```bash
-cd ../agnus-composer
+cd ../agnus-composer   # ou a pasta do repositório agnus-composer
 docker compose up -d --build
-# API em http://localhost:3000 (rotas na raiz: /products, /auth/login, ...)
 ```
+
+A API fica atrás do gateway: `https://localhost/api` na própria máquina. Para o
+celular, suba também o túnel do **ngrok** (serviço `ngrok` do compose): defina
+`NGROK_AUTHTOKEN` e `NGROK_DOMAIN` no `.env` do composer.
 
 ## Configurar o ambiente
 
@@ -36,15 +40,22 @@ docker compose up -d --build
 cp .env.example .env
 ```
 
-Ajuste `EXPO_PUBLIC_API_URL` conforme onde o app roda — a URL aponta **direto para o
-backend** (o prefixo `/api` é só do nginx do web, não use aqui):
+Ajuste `EXPO_PUBLIC_API_URL` conforme onde o app roda:
 
-| Onde                 | URL                                  |
-| -------------------- | ------------------------------------ |
-| iOS simulator / web  | `http://localhost:3000`              |
-| **Android emulator** | `http://10.0.2.2:3000`               |
-| Device físico        | `http://<IP-da-sua-maquina>:3000`    |
-| Produção             | confirmar domínio público com o time |
+| Onde                                     | URL                                    |
+| ---------------------------------------- | -------------------------------------- |
+| **Celular, emulador Android, simulador** | `https://<seu-dominio>.ngrok-free.dev` |
+| Navegador na mesma máquina (`w`)         | `https://localhost/api`                |
+| Produção                                 | `https://<dominio-do-gateway>/api`     |
+
+- **Pelo ngrok a URL é a raiz do domínio, sem `/api`:** a entrada do túnel no
+  gateway já acrescenta o prefixo.
+- O celular não aceita o certificado do mkcert, e a porta 80 só redireciona para
+  HTTPS. Por isso o desenvolvimento no aparelho passa pelo ngrok.
+- Para domínios do ngrok, o app manda o cabeçalho `ngrok-skip-browser-warning`,
+  que evita a página de aviso do plano gratuito.
+- O gateway aceita 10 tentativas de login por minuto por IP. Acima disso, o app
+  pede para esperar um pouco.
 
 ## Rodar
 
@@ -54,9 +65,11 @@ npx expo start
 ```
 
 - `a` abre no Android, `i` no iOS, `w` no navegador.
-- Ou escaneie o QR code com o Expo Go (device físico → use o IP da máquina na URL).
+- Ou escaneie o QR code com o Expo Go (device físico → use a URL do ngrok).
 
-Tudo roda no **Expo Go** — nenhuma dependência exige dev build.
+Tudo roda no **Expo Go**, nenhuma dependência exige dev build. O app está no
+SDK 57: se o Expo Go do celular não abrir essa versão, gere um development build
+(`eas build --profile development`) em vez de rebaixar o SDK.
 
 ## Login com Google
 
@@ -70,14 +83,15 @@ navegador; o backend faz o OAuth com o Google (usando o client Web dele) e, no
 callback, redireciona pra `<url-do-app>?token=…`. O app lê o `token` e hidrata a
 sessão com `/auth/me`.
 
-Requisitos no **`agnus-back`** (o app não precisa de nada além da API):
+Requisitos no **serviço de identidade** (`services/identidade` do composer):
 
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` /
   `GOOGLE_OAUTH_SCOPES` / `GOOGLE_STATE_SECRET` configurados (já usados no login
   web).
 - O `GET /auth/google` aceita `?redirect=` e só repassa esquemas do allowlist
-  (`exp://`, `exp+`, `agnusapp://`, `http://localhost`, `http://127.0.0.1`) — o
-  resto cai no `FRONTEND_URL` normal.
+  (`exp://`, `exp+`, `agnusapp://`, `http://localhost`, `http://127.0.0.1`); o
+  resto cai no `FRONTEND_URL` normal. **Em produção só `agnusapp://` é aceito**:
+  teste o Google em produção com o build do EAS, não com o Expo Go.
 - No Google Cloud Console, o **redirect URI autorizado** do client Web continua
   sendo só o `GOOGLE_REDIRECT_URI` do backend; o Google nunca vê o `exp://`.
 
@@ -165,4 +179,3 @@ src/
 - `pre-commit` roda lint-staged (ESLint + Prettier nos arquivos staged).
 - `pre-push` roda `npm run typecheck`.
 - Nunca commitar `.env` nem segredos. O JWT vive só no SecureStore.
-- Não alterar `agnus-back` / `agnus-front`.

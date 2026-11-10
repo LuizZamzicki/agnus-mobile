@@ -1,4 +1,4 @@
-/** Metadados de paginação (`buildPaginationMeta` do agnus-back). */
+/** Metadados de paginação (`buildPaginationMeta` de `services/comum`). */
 export interface Pagination {
   page: number;
   limit: number;

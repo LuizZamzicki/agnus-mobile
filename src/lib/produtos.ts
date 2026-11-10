@@ -6,7 +6,7 @@ import { numeroSeguro } from "./format";
 /**
  * Normalização defensiva de dados de produto. Portado de
  * `agnus-front/src/utils/produtos.js` (`parseJsonSeguro`, extração de imagem/cor),
- * adaptado às respostas reais dos controllers do `agnus-back`.
+ * adaptado às respostas reais dos controllers dos microsserviços.
  */
 
 /** Aceita array, string JSON de array, ou devolve o fallback. */

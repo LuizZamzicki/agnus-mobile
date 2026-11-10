@@ -1,6 +1,6 @@
 export type UserRole = "cliente" | "administrador";
 
-/** Espelha `AuthService.sanitizeUser` do `agnus-back`. */
+/** Espelha `AuthService.sanitizeUser` do serviço de identidade (`services/identidade`). */
 export interface User {
   id_usuario: number;
   nome: string;

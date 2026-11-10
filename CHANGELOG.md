@@ -17,6 +17,10 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   aparecia como mensagem de erro. Agora o app ignora corpo HTML e mostra
   "Muitas tentativas. Aguarde um minuto e tente novamente."; 502, 503 e 504
   viram "O serviço está indisponível agora".
+- **Login com Google confere o `nonce`** (AGNUS-216): o app gera um `nonce`
+  (`expo-crypto`), manda em `/auth/google` e só aceita o token se o mesmo valor
+  voltar. É uma defesa a mais contra um retorno trocado durante o fluxo (login
+  forjado com a sessão de outra pessoa), igual ao site.
 
 ### Reestruturação: Expo Router
 

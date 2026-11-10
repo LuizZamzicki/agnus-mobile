@@ -38,6 +38,9 @@ Este projeto é entregue em PRs por fase (ver `README.md`).
   (`GET /notifications/me`). Atualiza a cada minuto e ao voltar para o app.
   Tocar numa notificação marca como lida e abre o pedido; "Marcar todas" usa
   `PATCH /notifications/read-all`. Ícones por status, iguais aos do site.
+- **Fotos nas avaliações** (AGNUS-222): cada avaliação da tela do produto mostra
+  as fotos de `GET /product-review-photos/:id` em miniaturas; tocar abre a foto
+  em tela cheia.
 
 ### Reestruturação: Expo Router
 

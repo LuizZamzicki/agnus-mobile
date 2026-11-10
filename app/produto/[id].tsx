@@ -10,6 +10,7 @@ import { ErrorState } from "../../src/components/ErrorState";
 import { Price } from "../../src/components/Price";
 import { PhotoCarousel } from "../../src/components/produtos/PhotoCarousel";
 import { ProductCard } from "../../src/components/produtos/ProductCard";
+import { ReviewPhotos } from "../../src/components/avaliacoes/ReviewPhotos";
 import { Rating } from "../../src/components/Rating";
 import { SizePicker } from "../../src/components/produtos/SizePicker";
 import { useToast } from "../../src/components/layout/Toast";
@@ -210,6 +211,7 @@ function ReviewsSection({ reviews, average }: { reviews: ProductReview[]; averag
           <Rating value={numeroSeguro(review.nota, 0)} size={13} showValue={false} />
           {review.titulo ? <Text style={styles.reviewTitle}>{review.titulo}</Text> : null}
           {review.comentario ? <Text style={styles.reviewBody}>{review.comentario}</Text> : null}
+          <ReviewPhotos reviewId={review.id_avaliacao_produto} />
         </View>
       ))}
     </View>
